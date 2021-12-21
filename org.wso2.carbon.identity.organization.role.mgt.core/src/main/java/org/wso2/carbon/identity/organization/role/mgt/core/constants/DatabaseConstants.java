@@ -25,6 +25,7 @@ public class DatabaseConstants {
         public static final String COUNT_COLUMN_NAME = "COUNT(1)";
         public static final String INSERT_ALL = "INSERT ALL";
         public static final String VIEW_ID_COLUMN = "UM_ID";
+        public static final String VIEW_PARENT_ID_COLUMN = "UM_PARENT_ID";
         public static final String VIEW_USER_ID_COLUMN = "UM_USER_ID";
         public static final String VIEW_ROLE_ID_COLUMN = "UM_ROLE_ID";
         public static final String VIEW_ROLE_NAME_COLUMN = "UM_ROLE_NAME";
@@ -41,10 +42,12 @@ public class DatabaseConstants {
         public static final String INSERT_INTO_ORGANIZATION_USER_ROLE_MAPPING_USING_SP = "{call add_org_user_role_mapping(?,?,?,?,?,?)}";
         public static final String SELECT_DUMMY_RECORD = "SELECT 1 FROM DUAL";
         public static final String GET_USERS_BY_ORG_AND_ROLE = "SELECT URO.UM_USER_ID, URO.MANDATORY,  URO.ASSIGNED_AT," +
-                "UO.NAME FROM UM_USER_ROLE_ORG URO LEFT JOIN UM_ORG UO ON URO.ASSIGNED_AT = UO.ID WHERE URO.ORG_ID = ?" +
+                "UO.UM_ORG_NAME FROM UM_USER_ROLE_ORG URO LEFT JOIN UM_ORG UO ON URO.ASSIGNED_AT = UO.UM_ID WHERE URO.ORG_ID = ?" +
                 "AND URO.UM_ROLE_ID = ? AND URO.UM_TENANT_ID = ?";
         public static final String DELETE_ORGANIZATION_USER_ROLE_MAPPINGS_ASSIGNED_AT_ORG_LEVEL = "DELETE FROM UM_USER_ROLE_ORG " +
-                "WHERE UM_USER_ID = ? AND UM_ROLE_ID = ? AND UM_TENANT_ID = ? AND ASSIGNED_AT = ?";
+                "WHERE UM_USER_ID = ? AND UM_ROLE_ID = ? AND UM_TENANT_ID = ? AND ASSIGNED_AT = ? ";
+        public static final String DELETE_ORGANIZATION_USER_ROLE_MAPPINGS_ASSIGNED_AT_ORG_LEVEL_NON_MANDATORY = "DELETE FROM UM_USER_ROLE_ORG " +
+                "WHERE UM_USER_ID = ? AND UM_ROLE_ID = ? AND UM_TENANT_ID = ? AND ASSIGNED_AT = ? AND ORG_ID = ?";
         public static final String DELETE_ALL_ORGANIZATION_USER_ROLE_MAPPINGS_BY_USERID = "DELETE FROM UM_USER_ROLE_ORG " +
                 "WHERE UM_USER_ID = ? AND UM_TENANT_ID = ?";
         //TODO: ORG_AUTHZ_VIEW TABLE CREATION AND TESTING
@@ -61,8 +64,9 @@ public class DatabaseConstants {
                 "SELECT MANDATORY FROM UM_USER_ROLE_ORG WHERE UM_USER_ID = ? AND UM_ROLE_ID = ? AND UM_TENANT_ID = ? AND " +
                         "ORG_ID = ? AND ASSIGNED_AT = ?";
         public static final String FIND_ALL_CHILD_ORG_IDS =
-                "SELECT ID FROM UM_ORG START WITH PARENT_ID = ? CONNECT BY NOCYCLE PARENT_ID = PRIOR ID ORDER SIBLINGS BY " +
-                        "PARENT_ID";
+                "WITH childOrgs(UM_ID, UM_PARENT_ID) AS ( SELECT UM_ID , UM_PARENT_ID FROM UM_ORG WHERE UM_PARENT_ID = ?" +
+                "UNION ALL SELECT UO.UM_ID, UO.UM_PARENT_ID FROM UM_ORG UO JOIN childOrgs CO ON CO.UM_ID = UO.UM_PARENT_ID)"+
+                        "SELECT UM_ID, UM_PARENT_ID FROM childOrgs ORDER BY UM_ID";
         public static final String VIEW_ORG_ID_COLUMN = "ORG_ID";
     }
 

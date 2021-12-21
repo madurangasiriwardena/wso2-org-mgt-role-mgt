@@ -96,7 +96,8 @@ public class OrganizationUserRoleHandler extends AbstractEventHandler {
         for (UserRoleMappingUser userRoleMappingUser : organizationUserRoleMappingForRevokeEvent
                 .getUsersRoleInheritance()) {
             builder.append(", { UserId : " + userRoleMappingUser.getUserId());
-            builder.append(", isMandatory : " + userRoleMappingUser.isMandatoryRole());
+            builder.append(", isMandatoryRole : " + userRoleMappingUser.isMandatoryRole());
+            builder.append(", isCascadedRole: "+userRoleMappingUser.isCascadedRole());
             builder.append(" }");
         }
         return builder.toString();

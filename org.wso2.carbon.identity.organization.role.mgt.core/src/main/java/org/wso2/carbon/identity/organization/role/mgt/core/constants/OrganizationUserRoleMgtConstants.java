@@ -22,6 +22,9 @@ public class OrganizationUserRoleMgtConstants {
 
     public static final String CASCADE_INSERT_USER_ORG_ROLES = "isCascadeInsert";
 
+    public static final String PATCH_OP_ADD = "add";
+    public static final String PATCH_OP_REMOVE = "remove";
+    public static final String PATCH_OP_REPLACE = "replace";
     /**
      * Error messages.
      */
@@ -49,11 +52,12 @@ public class OrganizationUserRoleMgtConstants {
                 "Patch path must be '/includeSubOrgs'"),
         PATCH_ORG_ROLE_USER_REQUEST_INVALID_VALUE("ORG-60212", "Invalid value",
                 "Patch operation value must be a boolean"),
-        ADD_ORG_ROLE_USER_REQUEST_MAPPING_EXISTS("ORG-60213", "Mapping already exists", "%s"),
+        PATCH_ORG_ROLE_USER_REQUEST_INVALID_BOOLEAN_VALUE("ORG-60213", "Invalid value",
+                "Patch operation boolean value error"),
+        ADD_ORG_ROLE_USER_REQUEST_MAPPING_EXISTS("ORG-60214", "Mapping already exists", "%s"),
+        INVALID_REQUEST("ORG-60215", "Invalid request", "Error while processing the request."),
 
         // Role Mgt Server Errors (ORG-65200 - ORG-65999)
-        ERROR_CODE_ORGANIZATION_GET_CHILDREN_ERROR("ORG-65007",
-                "Error while retrieving the child organizations : %s", ""),
         ERROR_CODE_ORGANIZATION_USER_ROLE_MAPPINGS_ADD_ERROR("ORG-65200",
                 "Error while creating the role mappings", ""),
         ERROR_CODE_ORGANIZATION_USER_ROLE_MAPPINGS_DELETE_ERROR("ORG-65201",
@@ -72,7 +76,9 @@ public class OrganizationUserRoleMgtConstants {
                 "Error while deleting organization user role mappings for user : %s", ""),
         ERROR_CODE_ORGANIZATION_USER_ROLE_MAPPINGS_UPDATE_ERROR("ORG-65209",
                 "Error while updating includeSubOrgs property of organization: %s , user: %s, role: %s mapping", ""),
-        ERROR_CODE_UNEXPECTED("ORG-65210", "Unexpected Error", "");
+        ERROR_CODE_UNEXPECTED("ORG-65210", "Unexpected Error", ""),
+        ERROR_CODE_ORGANIZATION_GET_CHILDREN_ERROR("ORG-65211",
+                "Error while retrieving the child organizations : %s", "");
 
         private final String code;
         private final String message;

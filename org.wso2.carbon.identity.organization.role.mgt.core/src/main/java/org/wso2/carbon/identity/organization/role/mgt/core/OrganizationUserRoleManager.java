@@ -34,11 +34,10 @@ public interface OrganizationUserRoleManager {
             throws OrganizationUserRoleMgtException;
 
     void patchOrganizationsUserRoleMapping(String organizationId, String roleId,
-                                           String userId, List<UserRoleOperation> userRoleOperation)
+                                           String userId, List<UserRoleOperation> userRoleOperations)
             throws OrganizationUserRoleMgtException;
 
-    void deleteOrganizationsUserRoleMapping(String organizationId, String userId, String roleId, String assignedLevel,
-                                            boolean includeSubOrg, boolean checkInheritance)
+    void deleteOrganizationsUserRoleMapping(String organizationId, String userId, String roleId, String assignedLevel, boolean mandatory, boolean includeSubOrgs)
             throws OrganizationUserRoleMgtException;
 
     void deleteOrganizationsUserRoleMappings(String userId) throws OrganizationUserRoleMgtException;

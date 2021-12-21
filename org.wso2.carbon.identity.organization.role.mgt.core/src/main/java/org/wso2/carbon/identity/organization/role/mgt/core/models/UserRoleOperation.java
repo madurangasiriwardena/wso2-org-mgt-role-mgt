@@ -45,7 +45,7 @@ public class UserRoleOperation {
         this.path = path;
     }
 
-    public boolean isValue() {
+    public boolean getValue() {
         return value;
     }
 

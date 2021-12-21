@@ -24,6 +24,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.MDC;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.organization.role.mgt.core.OrganizationUserRoleManager;
+import org.wso2.carbon.identity.organization.role.mgt.core.exception.OrganizationUserRoleMgtException;
 import org.wso2.carbon.identity.organization.role.mgt.endpoint.exception.ConflictRequestException;
 import org.wso2.carbon.identity.organization.role.mgt.endpoint.exception.BadRequestException;
 import org.wso2.carbon.identity.organization.role.mgt.endpoint.exception.ForbiddenException;
@@ -102,7 +103,7 @@ public class RoleMgtEndpointUtils {
         throw buildBadRequestException(e.getDescription(), e.getMessage(), e.getErrorCode(), log, e);
     }
 
-    public static Response handleServerErrorResponse(OrganizationUserRoleMgtClientException e, Log log) {
+    public static Response handleServerErrorResponse(OrganizationUserRoleMgtException e, Log log) {
 
         throw buildInternalServerErrorException(e.getErrorCode(), log, e);
     }

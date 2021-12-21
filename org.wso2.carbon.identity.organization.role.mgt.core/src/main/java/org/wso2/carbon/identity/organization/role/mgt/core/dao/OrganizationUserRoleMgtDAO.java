@@ -20,10 +20,7 @@ package org.wso2.carbon.identity.organization.role.mgt.core.dao;
 
 import org.wso2.carbon.identity.organization.role.mgt.core.exception.OrganizationUserRoleMgtException;
 import org.wso2.carbon.identity.organization.role.mgt.core.exception.OrganizationUserRoleMgtServerException;
-import org.wso2.carbon.identity.organization.role.mgt.core.models.OrganizationUserRoleMapping;
-import org.wso2.carbon.identity.organization.role.mgt.core.models.Role;
-import org.wso2.carbon.identity.organization.role.mgt.core.models.UserRoleMappingUser;
-import org.wso2.carbon.identity.organization.role.mgt.core.models.RoleMember;
+import org.wso2.carbon.identity.organization.role.mgt.core.models.*;
 
 import java.util.List;
 
@@ -39,8 +36,8 @@ public interface OrganizationUserRoleMgtDAO {
                                                      List<String> requestedAttributes, int tenantID, String filter)
             throws OrganizationUserRoleMgtServerException;
 
-    void deleteOrganizationsUserRoleMapping(String deleteInvokedOrgId, List<String> organizationIds, String userId,
-                                            String roleId, int tenantId)
+    void deleteOrganizationsUserRoleMapping(String deleteInvokedOrgId, List<ChildParentAssociation> childParentAssociations, String userId,
+                                            String roleId, int tenantId, boolean isMandatory)
             throws OrganizationUserRoleMgtException;
 
     void deleteOrganizationsUserRoleMappings(String userId, int tenantId) throws OrganizationUserRoleMgtException;
@@ -48,9 +45,10 @@ public interface OrganizationUserRoleMgtDAO {
     List<Role> getRolesByOrganizationAndUser(String organizationId, String userId, int tenantId)
             throws OrganizationUserRoleMgtServerException;
 
-    void updateMandatoryProperty(String organizationId, String roleId, String userId, boolean mandatory,
-                                     List<OrganizationUserRoleMapping> organizationUserRoleMappingsToAdd,
-                                     List<String> childOrganizationIdsToDeleteRecords, int tenantId)
+    void updateMandatoryProperty(String organizationId, String userId, String roleId,
+                                 List<OrganizationUserRoleMapping> organizationUserRoleMappingsToAdd,
+                                 List<OrganizationUserRoleMapping> organizationUserRoleMappiingsToUpdate,
+                                 List<String> childOrganizationIdsToDeleteRecords, int tenantId)
             throws OrganizationUserRoleMgtServerException;
 
     boolean isOrganizationUserRoleMappingExists(String organizationId, String userId, String roleId,
@@ -64,5 +62,5 @@ public interface OrganizationUserRoleMgtDAO {
 
     Integer getRoleIdBySCIMGroupName(String roleName, int tenantId) throws OrganizationUserRoleMgtServerException;
 
-    List<String> getAllSubOrganizations(String organizationId) throws OrganizationUserRoleMgtException;
+    List<ChildParentAssociation> getAllSubOrganizations(String organizationId) throws OrganizationUserRoleMgtException;
 }

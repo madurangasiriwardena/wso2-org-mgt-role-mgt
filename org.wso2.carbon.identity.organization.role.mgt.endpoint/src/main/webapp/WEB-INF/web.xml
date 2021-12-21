@@ -18,8 +18,8 @@
 
 <web-app xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="2.5"
          xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
-    <display-name>WSO2 Identity Server REST API</display-name>
-    <description>WSO2 Identity Server REST API</description>
+    <display-name>WSO2 Identity Server Organization Management - Role Management REST API</display-name>
+    <description>WSO2 Identity Server Organization Management - Role Management REST API</description>
     <context-param>
         <param-name>contextConfigLocation</param-name>
         <param-value>WEB-INF/beans.xml</param-value>
