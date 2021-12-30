@@ -47,7 +47,7 @@ public class DatabaseConstants {
         public static final String DELETE_ORGANIZATION_USER_ROLE_MAPPINGS_ASSIGNED_AT_ORG_LEVEL = "DELETE FROM UM_USER_ROLE_ORG " +
                 "WHERE UM_USER_ID = ? AND UM_ROLE_ID = ? AND UM_TENANT_ID = ? AND ASSIGNED_AT = ? ";
         public static final String DELETE_ORGANIZATION_USER_ROLE_MAPPINGS_ASSIGNED_AT_ORG_LEVEL_NON_MANDATORY = "DELETE FROM UM_USER_ROLE_ORG " +
-                "WHERE UM_USER_ID = ? AND UM_ROLE_ID = ? AND UM_TENANT_ID = ? AND ASSIGNED_AT = ? AND ORG_ID = ?";
+                "WHERE UM_USER_ID = ? AND UM_ROLE_ID = ? AND UM_TENANT_ID = ? ";
         public static final String DELETE_ALL_ORGANIZATION_USER_ROLE_MAPPINGS_BY_USERID = "DELETE FROM UM_USER_ROLE_ORG " +
                 "WHERE UM_USER_ID = ? AND UM_TENANT_ID = ?";
         //TODO: ORG_AUTHZ_VIEW TABLE CREATION AND TESTING
@@ -63,6 +63,12 @@ public class DatabaseConstants {
         public static final String GET_DIRECTLY_ASSIGNED_ORGANIZATION_USER_ROLE_MAPPING_LINK =
                 "SELECT MANDATORY FROM UM_USER_ROLE_ORG WHERE UM_USER_ID = ? AND UM_ROLE_ID = ? AND UM_TENANT_ID = ? AND " +
                         "ORG_ID = ? AND ASSIGNED_AT = ?";
+        public static final String GET_MANDATORY_VALUE_OF_ORGANIZATION_USER_ROLE_MAPPING_LINK =
+                "SELECT MANDATORY FROM UM_USER_ROLE_ORG WHERE UM_USER_ID = ? AND UM_ROLE_ID = ? AND UM_TENANT_ID = ? AND " +
+                "ORG_ID = ?";
+        public static final String GET_ASSIGNED_AT_VALUE_OF_ORGANIZATION_USER_ROLE_MAPPING_LINK =
+                "SELECT ASSIGNED_AT FROM UM_USER_ROLE_ORG WHERE UM_USER_ID = ? AND UM_ROLE_ID = ? AND UM_TENANT_ID = ? AND " +
+                        "ORG_ID = ?";
         public static final String FIND_ALL_CHILD_ORG_IDS =
                 "WITH childOrgs(UM_ID, UM_PARENT_ID) AS ( SELECT UM_ID , UM_PARENT_ID FROM UM_ORG WHERE UM_PARENT_ID = ?" +
                 "UNION ALL SELECT UO.UM_ID, UO.UM_PARENT_ID FROM UM_ORG UO JOIN childOrgs CO ON CO.UM_ID = UO.UM_PARENT_ID)"+

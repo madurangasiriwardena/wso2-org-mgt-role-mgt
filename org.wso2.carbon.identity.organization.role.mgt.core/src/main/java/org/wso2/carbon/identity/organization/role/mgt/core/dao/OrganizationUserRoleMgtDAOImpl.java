@@ -20,7 +20,6 @@ package org.wso2.carbon.identity.organization.role.mgt.core.dao;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.poi.poifs.property.Child;
 import org.wso2.carbon.identity.organization.role.mgt.core.constants.DatabaseConstants;
 import org.wso2.carbon.identity.organization.role.mgt.core.constants.OrganizationUserRoleMgtConstants;
 import org.wso2.carbon.identity.organization.role.mgt.core.exception.OrganizationUserRoleMgtException;
@@ -85,7 +84,7 @@ public class OrganizationUserRoleMgtDAOImpl implements OrganizationUserRoleMgtDA
         }
     }
 
-    //TODO: Better check this with OrganiztionUserRoleManagerImpl addOrganizationUserRoleMapping()
+    //TODO: Better check this with OrganizationUserRoleManagerImpl addOrganizationUserRoleMapping()
     @Override
     public void addOrganizationUserRoleMappingsWithSp(List<UserRoleMappingUser> userList, String roleId,
                                                       int hybridRoleId, int tenantID, String assignedAt)
@@ -216,7 +215,7 @@ public class OrganizationUserRoleMgtDAOImpl implements OrganizationUserRoleMgtDA
         try {
             jdbcTemplate.withTransaction(template -> {
                 if (isMandatory) {
-                    template.executeUpdate(queryForMultipleRoleMappingDeletion(childParentAssociations.size()),
+                    template.executeUpdate(queryForMultipleRoleMappingDeletionMandatory(childParentAssociations.size()),
                             preparedStatement -> {
                                 int parameterIndex = 0;
                                 preparedStatement.setString(++parameterIndex, userId);
@@ -228,18 +227,18 @@ public class OrganizationUserRoleMgtDAOImpl implements OrganizationUserRoleMgtDA
                                 }
                             });
                 } else {
-                    for (ChildParentAssociation childParentAssociation : childParentAssociations) {
-                        template.executeUpdate(DatabaseConstants.H2Constants.DELETE_ORGANIZATION_USER_ROLE_MAPPINGS_ASSIGNED_AT_ORG_LEVEL_NON_MANDATORY,
-                                preparedStatement -> {
-                                    int parameterIndex = 0;
-                                    preparedStatement.setString(++parameterIndex, userId);
-                                    preparedStatement.setString(++parameterIndex, roleId);
-                                    preparedStatement.setInt(++parameterIndex, tenantId);
+                    //single query to delete multiple non-mandatory organization-user-role mappings
+                    template.executeUpdate(queryForMultipleRoleMappingDeletionNonMandatory(childParentAssociations.size()),
+                            preparedStatement -> {
+                                int parameterIndex = 0;
+                                preparedStatement.setString(++parameterIndex, userId);
+                                preparedStatement.setString(++parameterIndex, roleId);
+                                preparedStatement.setInt(++parameterIndex, tenantId);
+                                for (ChildParentAssociation childParentAssociation : childParentAssociations) {
                                     preparedStatement.setString(++parameterIndex, childParentAssociation.getParentOrgId());
                                     preparedStatement.setString(++parameterIndex, childParentAssociation.getOrganizationId());
                                 }
-                        );
-                    }
+                            });
                 }
                 return null;
             });
@@ -296,7 +295,7 @@ public class OrganizationUserRoleMgtDAOImpl implements OrganizationUserRoleMgtDA
     }
 
     @Override
-    //TODO: Need to change accrodingly
+    //TODO: Need to change accordingly.
     public void updateMandatoryProperty(String organizationId, String userId, String roleId, List<OrganizationUserRoleMapping> organizationUserRoleMappingsToAdd,
                                         List<OrganizationUserRoleMapping> organizationUserRoleMappingsToUpdate,
                                         List<String> childOrganizationIdsToDeleteRecords, int tenantId)
@@ -336,7 +335,7 @@ public class OrganizationUserRoleMgtDAOImpl implements OrganizationUserRoleMgtDA
                 }
                 if (CollectionUtils.isNotEmpty(childOrganizationIdsToDeleteRecords)) {
                     template.executeUpdate(
-                            queryForMultipleRoleMappingDeletion(childOrganizationIdsToDeleteRecords.size()),
+                            queryForMultipleRoleMappingDeletionMandatory(childOrganizationIdsToDeleteRecords.size()),
                             preparedStatement -> {
                                 int parameterIndex = 0;
                                 preparedStatement.setString(++parameterIndex, userId);
@@ -349,10 +348,10 @@ public class OrganizationUserRoleMgtDAOImpl implements OrganizationUserRoleMgtDA
                             });
                 }
                 if (CollectionUtils.isNotEmpty(organizationUserRoleMappingsToUpdate)) {
-                    template.executeUpdate(DatabaseConstants.H2Constants.UPDATE_ORGANIZATION_USER_ROLE_MAPPING_INHERIT_PROPERTY,preparedStatement -> {
+                    template.executeUpdate(DatabaseConstants.H2Constants.UPDATE_ORGANIZATION_USER_ROLE_MAPPING_INHERIT_PROPERTY, preparedStatement -> {
 
-                        for (OrganizationUserRoleMapping organizationUserRoleMapping: organizationUserRoleMappingsToUpdate) {
-                            int parameterIndex=0;
+                        for (OrganizationUserRoleMapping organizationUserRoleMapping : organizationUserRoleMappingsToUpdate) {
+                            int parameterIndex = 0;
                             //TODO: Fix this
                             preparedStatement.setInt(++parameterIndex, 1);
                             preparedStatement.setString(++parameterIndex, userId);
@@ -492,6 +491,84 @@ public class OrganizationUserRoleMgtDAOImpl implements OrganizationUserRoleMgtDA
         }
     }
 
+    @Override
+    public int getMandatoryOfAnyOrganizationUserRoleMapping(String organizationId, String userId, String roleId, int tenantId) throws OrganizationUserRoleMgtException {
+        JdbcTemplate jdbcTemplate = Utils.getNewJdbcTemplate();
+        int mandatoryOfAnyOrganizationUserRoleMapping = -1;
+        try {
+            boolean mappingExists = jdbcTemplate
+                    .fetchSingleRecord(buildIsRoleMappingExistsQuery(null, false),
+                            (resultSet, rowNumber) ->
+                                    resultSet.getInt(DatabaseConstants.H2Constants.COUNT_COLUMN_NAME) == 1,
+                            preparedStatement -> {
+                                int parameterIndex = 0;
+                                preparedStatement.setString(++parameterIndex, userId);
+                                preparedStatement.setString(++parameterIndex, roleId);
+                                preparedStatement.setInt(++parameterIndex, tenantId);
+                                preparedStatement.setString(++parameterIndex, organizationId);
+                            });
+            if (!mappingExists) {
+                return mandatoryOfAnyOrganizationUserRoleMapping;
+            }
+            mandatoryOfAnyOrganizationUserRoleMapping =
+                    jdbcTemplate.fetchSingleRecord(DatabaseConstants.H2Constants.GET_MANDATORY_VALUE_OF_ORGANIZATION_USER_ROLE_MAPPING_LINK,
+                            (resultSet, rowNumber) -> resultSet.getInt(DatabaseConstants.H2Constants.VIEW_MANDATORY_COLUMN),
+                            preparedStatement -> {
+                                int parameterIndex = 0;
+                                preparedStatement.setString(++parameterIndex, userId);
+                                preparedStatement.setString(++parameterIndex, roleId);
+                                preparedStatement.setInt(++parameterIndex, tenantId);
+                                preparedStatement.setString(++parameterIndex, organizationId);
+                            });
+        } catch (DataAccessException e) {
+            String message =
+                    String.format(String.valueOf(OrganizationUserRoleMgtConstants.ErrorMessages.ERROR_CODE_ORGANIZATION_USER_ROLE_MAPPINGS_RETRIEVING_ERROR), roleId,
+                            userId, organizationId);
+            throw new OrganizationUserRoleMgtServerException(message,
+                    OrganizationUserRoleMgtConstants.ErrorMessages.ERROR_CODE_ORGANIZATION_USER_ROLE_MAPPINGS_RETRIEVING_ERROR.getCode(), e);
+        }
+        return mandatoryOfAnyOrganizationUserRoleMapping;
+    }
+
+    @Override
+    public String getAssignedAtOfAnyOrganizationUserRoleMapping(String organizationId, String userId, String roleId, int tenantId) throws OrganizationUserRoleMgtException {
+        JdbcTemplate jdbcTemplate = Utils.getNewJdbcTemplate();
+        String assignedAt = "";
+        try {
+            boolean mappingExists = jdbcTemplate
+                    .fetchSingleRecord(buildIsRoleMappingExistsQuery(null, false),
+                            (resultSet, rowNumber) ->
+                                    resultSet.getInt(DatabaseConstants.H2Constants.COUNT_COLUMN_NAME) == 1,
+                            preparedStatement -> {
+                                int parameterIndex = 0;
+                                preparedStatement.setString(++parameterIndex, userId);
+                                preparedStatement.setString(++parameterIndex, roleId);
+                                preparedStatement.setInt(++parameterIndex, tenantId);
+                                preparedStatement.setString(++parameterIndex, organizationId);
+                            });
+            if (!mappingExists) {
+                return assignedAt;
+            }
+            assignedAt =
+                    jdbcTemplate.fetchSingleRecord(DatabaseConstants.H2Constants.GET_ASSIGNED_AT_VALUE_OF_ORGANIZATION_USER_ROLE_MAPPING_LINK,
+                            (resultSet, rowNumber) -> resultSet.getString(DatabaseConstants.H2Constants.VIEW_ASSIGNED_AT_COLUMN),
+                            preparedStatement -> {
+                                int parameterIndex = 0;
+                                preparedStatement.setString(++parameterIndex, userId);
+                                preparedStatement.setString(++parameterIndex, roleId);
+                                preparedStatement.setInt(++parameterIndex, tenantId);
+                                preparedStatement.setString(++parameterIndex, organizationId);
+                            });
+        } catch (DataAccessException e) {
+            String message =
+                    String.format(String.valueOf(OrganizationUserRoleMgtConstants.ErrorMessages.ERROR_CODE_ORGANIZATION_USER_ROLE_MAPPINGS_RETRIEVING_ERROR), roleId,
+                            userId, organizationId);
+            throw new OrganizationUserRoleMgtServerException(message,
+                    OrganizationUserRoleMgtConstants.ErrorMessages.ERROR_CODE_ORGANIZATION_USER_ROLE_MAPPINGS_RETRIEVING_ERROR.getCode(), e);
+        }
+        return assignedAt;
+    }
+
     private String queryForMultipleInserts(Integer numberOfMapings) {
         StringBuilder sb = new StringBuilder();
         sb.append(DatabaseConstants.H2Constants.INSERT_ALL);
@@ -503,12 +580,27 @@ public class OrganizationUserRoleMgtDAOImpl implements OrganizationUserRoleMgtDA
         return sb.toString();
     }
 
-    private String queryForMultipleRoleMappingDeletion(int numberOfOrganizations) {
+    private String queryForMultipleRoleMappingDeletionMandatory(int numberOfOrganizations) {
         StringBuilder sb = new StringBuilder();
         sb.append(DatabaseConstants.H2Constants.DELETE_ORGANIZATION_USER_ROLE_MAPPINGS_ASSIGNED_AT_ORG_LEVEL);
         sb.append(DatabaseConstants.H2Constants.AND).append("(");
         for (int i = 0; i < numberOfOrganizations; i++) {
             sb.append(DatabaseConstants.H2Constants.ORG_ID_ADDING);
+            if (i != numberOfOrganizations - 1) {
+                sb.append(DatabaseConstants.H2Constants.OR);
+            }
+        }
+        sb.append(")");
+        return sb.toString();
+    }
+
+    private String queryForMultipleRoleMappingDeletionNonMandatory(int numberOfOrganizations) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(DatabaseConstants.H2Constants.DELETE_ORGANIZATION_USER_ROLE_MAPPINGS_ASSIGNED_AT_ORG_LEVEL_NON_MANDATORY);
+        sb.append(DatabaseConstants.H2Constants.AND).append("(");
+        for (int i = 0; i < numberOfOrganizations; i++) {
+            sb.append("(").append(DatabaseConstants.H2Constants.ASSIGNED_AT_ADDING).append(DatabaseConstants.H2Constants.AND)
+                    .append(DatabaseConstants.H2Constants.ORG_ID_ADDING).append(")");
             if (i != numberOfOrganizations - 1) {
                 sb.append(DatabaseConstants.H2Constants.OR);
             }

@@ -63,4 +63,8 @@ public interface OrganizationUserRoleMgtDAO {
     Integer getRoleIdBySCIMGroupName(String roleName, int tenantId) throws OrganizationUserRoleMgtServerException;
 
     List<ChildParentAssociation> getAllSubOrganizations(String organizationId) throws OrganizationUserRoleMgtException;
+
+    int getMandatoryOfAnyOrganizationUserRoleMapping(String organizationId, String userId, String roleId, int tenantId) throws OrganizationUserRoleMgtException;
+
+    String getAssignedAtOfAnyOrganizationUserRoleMapping(String organizationId, String userId, String roleId, int tenantId) throws OrganizationUserRoleMgtException;
 }
