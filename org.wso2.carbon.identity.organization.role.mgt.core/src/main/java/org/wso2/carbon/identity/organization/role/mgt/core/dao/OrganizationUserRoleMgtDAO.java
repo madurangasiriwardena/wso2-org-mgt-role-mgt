@@ -23,6 +23,7 @@ import org.wso2.carbon.identity.organization.role.mgt.core.exception.Organizatio
 import org.wso2.carbon.identity.organization.role.mgt.core.models.*;
 
 import java.util.List;
+import java.util.Map;
 
 public interface OrganizationUserRoleMgtDAO {
     void addOrganizationUserRoleMappings(List<OrganizationUserRoleMapping> organizationUserRoleMappings, int tenantID)
@@ -36,8 +37,8 @@ public interface OrganizationUserRoleMgtDAO {
                                                      List<String> requestedAttributes, int tenantID, String filter)
             throws OrganizationUserRoleMgtServerException;
 
-    void deleteOrganizationsUserRoleMapping(String deleteInvokedOrgId, List<ChildParentAssociation> childParentAssociations, String userId,
-                                            String roleId, int tenantId, boolean isMandatory)
+    void deleteOrganizationsUserRoleMapping(Map<String,String> deletionList, String userId,
+                                            String roleId, int tenantId)
             throws OrganizationUserRoleMgtException;
 
     void deleteOrganizationsUserRoleMappings(String userId, int tenantId) throws OrganizationUserRoleMgtException;
@@ -47,8 +48,8 @@ public interface OrganizationUserRoleMgtDAO {
 
     void updateMandatoryProperty(String organizationId, String userId, String roleId,
                                  List<OrganizationUserRoleMapping> organizationUserRoleMappingsToAdd,
-                                 List<OrganizationUserRoleMapping> organizationUserRoleMappiingsToUpdate,
-                                 List<String> childOrganizationIdsToDeleteRecords, int tenantId)
+                                 List<OrganizationUserRoleMapping> organizationUserRoleMappingsToUpdate,
+                                 Map<String, String> childOrganizationIdsToDeleteRecords, int tenantId)
             throws OrganizationUserRoleMgtServerException;
 
     boolean isOrganizationUserRoleMappingExists(String organizationId, String userId, String roleId,

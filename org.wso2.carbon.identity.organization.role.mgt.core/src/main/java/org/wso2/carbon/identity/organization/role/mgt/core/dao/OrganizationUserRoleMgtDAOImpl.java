@@ -20,6 +20,8 @@ package org.wso2.carbon.identity.organization.role.mgt.core.dao;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.collections.MapUtils;
+import org.wso2.carbon.database.utils.jdbc.NamedJdbcTemplate;
 import org.wso2.carbon.identity.organization.role.mgt.core.constants.DatabaseConstants;
 import org.wso2.carbon.identity.organization.role.mgt.core.constants.OrganizationUserRoleMgtConstants;
 import org.wso2.carbon.identity.organization.role.mgt.core.exception.OrganizationUserRoleMgtException;
@@ -48,51 +50,66 @@ import java.sql.SQLException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static org.wso2.carbon.identity.organization.role.mgt.core.constants.DatabaseConstants.H2Constants.*;
+import static org.wso2.carbon.identity.organization.role.mgt.core.constants.DatabaseConstants.SQLPlaceholders.DB_SCHEMA_COLUMN_NAME_ID;
+import static org.wso2.carbon.identity.organization.role.mgt.core.constants.DatabaseConstants.SQLPlaceholders.DB_SCHEMA_COLUMN_NAME_ROLE_ID;
+import static org.wso2.carbon.identity.organization.role.mgt.core.constants.DatabaseConstants.SQLPlaceholders.DB_SCHEMA_COLUMN_NAME_USER_ID;
+import static org.wso2.carbon.identity.organization.role.mgt.core.constants.DatabaseConstants.SQLPlaceholders.DB_SCHEMA_COLUMN_NAME_TENANT_ID;
+import static org.wso2.carbon.identity.organization.role.mgt.core.constants.DatabaseConstants.SQLPlaceholders.DB_SCHEMA_COLUMN_NAME_ORG_ID;
+import static org.wso2.carbon.identity.organization.role.mgt.core.constants.DatabaseConstants.SQLPlaceholders.DB_SCHEMA_COLUMN_NAME_HYBRID_ROLE_ID;
+import static org.wso2.carbon.identity.organization.role.mgt.core.constants.DatabaseConstants.SQLPlaceholders.DB_SCHEMA_COLUMN_NAME_ASSIGNED_AT;
+import static org.wso2.carbon.identity.organization.role.mgt.core.constants.DatabaseConstants.SQLPlaceholders.DB_SCHEMA_COLUMN_NAME_MANDATORY;
+import static org.wso2.carbon.identity.organization.role.mgt.core.constants.DatabaseConstants.SQLPlaceholders.DB_SCHEMA_COLUMN_NAME_PARENT_ID;
+import static org.wso2.carbon.identity.organization.role.mgt.core.constants.DatabaseConstants.SQLPlaceholders.DB_SCHEMA_COLUMN_NAME_ROLE_NAME;
 import static org.wso2.carbon.identity.organization.role.mgt.core.constants.OrganizationUserRoleMgtConstants.ErrorMessages.ERROR_CODE_ORGANIZATION_GET_CHILDREN_ERROR;
+import static org.wso2.carbon.identity.organization.role.mgt.core.constants.OrganizationUserRoleMgtConstants.ErrorMessages.ERROR_CODE_ORGANIZATION_USER_ROLE_MAPPINGS_ADD_ERROR;
+import static org.wso2.carbon.identity.organization.role.mgt.core.constants.OrganizationUserRoleMgtConstants.ErrorMessages.ERROR_CODE_USERS_PER_ORG_ROLE_RETRIEVING_ERROR;
+import static org.wso2.carbon.identity.organization.role.mgt.core.constants.OrganizationUserRoleMgtConstants.ErrorMessages.ERROR_CODE_ORGANIZATION_USER_ROLE_MAPPINGS_RETRIEVING_ERROR;
+import static org.wso2.carbon.identity.organization.role.mgt.core.constants.OrganizationUserRoleMgtConstants.ErrorMessages.ERROR_CODE_ORGANIZATION_USER_ROLE_MAPPINGS_DELETE_ERROR;
+import static org.wso2.carbon.identity.organization.role.mgt.core.constants.OrganizationUserRoleMgtConstants.ErrorMessages.ERROR_CODE_ORGANIZATION_USER_ROLE_MAPPINGS_DELETE_PER_USER_ERROR;
+import static org.wso2.carbon.identity.organization.role.mgt.core.constants.OrganizationUserRoleMgtConstants.ErrorMessages.ERROR_CODE_ROLES_PER_ORG_USER_RETRIEVING_ERROR;
+import static org.wso2.carbon.identity.organization.role.mgt.core.constants.OrganizationUserRoleMgtConstants.ErrorMessages.ERROR_CODE_ORGANIZATION_USER_ROLE_MAPPINGS_UPDATE_ERROR;
+import static org.wso2.carbon.identity.organization.role.mgt.core.constants.OrganizationUserRoleMgtConstants.ErrorMessages.ERROR_CODE_HYBRID_ROLE_ID_RETRIEVING_ERROR;
 import static org.wso2.carbon.identity.organization.role.mgt.core.util.Utils.handleServerException;
 
 public class OrganizationUserRoleMgtDAOImpl implements OrganizationUserRoleMgtDAO {
     private static final Log LOG = LogFactory.getLog(OrganizationUserRoleMgtDAOImpl.class);
 
-    //TODO: ADD NamedJdbcTemplate and NamedPreparedStatement? = Use it
     //TODO : https://medium.com/@jayanga/named-prepared-statements-in-c5-user-core-ac91c5828d37
 
     @Override
     public void addOrganizationUserRoleMappings(List<OrganizationUserRoleMapping> organizationUserRoleMappings,
                                                 int tenantID)
             throws OrganizationUserRoleMgtException {
-        JdbcTemplate jdbcTemplate = Utils.getNewJdbcTemplate();
+        NamedJdbcTemplate namedJdbcTemplate = Utils.getNewNamedJdbcTemplate();
         try {
-            jdbcTemplate.withTransaction(template -> {
-                template.executeBatchInsert(queryForMultipleInserts(organizationUserRoleMappings.size()), preparedStatement -> {
-                    int parameterIndex = 0;
+            namedJdbcTemplate.withTransaction(template -> {
+                template.executeBatchInsert(queryForMultipleInserts(organizationUserRoleMappings.size()), namedPreparedStatement -> {
                     for (OrganizationUserRoleMapping organizationUserRoleMapping : organizationUserRoleMappings) {
-                        preparedStatement.setString(++parameterIndex, Utils.generateUniqueID()); //Unique ID // 1
-                        preparedStatement.setString(++parameterIndex, organizationUserRoleMapping.getUserId()); // 2
-                        preparedStatement.setString(++parameterIndex, organizationUserRoleMapping.getRoleId()); // 3
-                        preparedStatement.setInt(++parameterIndex, organizationUserRoleMapping.getHybridRoleId()); // 4
-                        preparedStatement.setInt(++parameterIndex, tenantID); // 5
-                        preparedStatement.setString(++parameterIndex, organizationUserRoleMapping.getOrganizationId()); // 6
-                        preparedStatement.setString(++parameterIndex, organizationUserRoleMapping.getAssignedLevelOrganizationId()); // 7
-                        preparedStatement.setInt(++parameterIndex, organizationUserRoleMapping.isMandatory() ? 1 : 0); // 8
+                        namedPreparedStatement.setString(DB_SCHEMA_COLUMN_NAME_ID, Utils.generateUniqueID());
+                        namedPreparedStatement.setString(DB_SCHEMA_COLUMN_NAME_USER_ID, organizationUserRoleMapping.getUserId());
+                        namedPreparedStatement.setString(DB_SCHEMA_COLUMN_NAME_ROLE_ID, organizationUserRoleMapping.getRoleId());
+                        namedPreparedStatement.setInt(DB_SCHEMA_COLUMN_NAME_HYBRID_ROLE_ID, organizationUserRoleMapping.getHybridRoleId());
+                        namedPreparedStatement.setInt(DB_SCHEMA_COLUMN_NAME_TENANT_ID, tenantID);
+                        namedPreparedStatement.setString(DB_SCHEMA_COLUMN_NAME_ORG_ID, organizationUserRoleMapping.getOrganizationId());
+                        namedPreparedStatement.setString(DB_SCHEMA_COLUMN_NAME_ASSIGNED_AT, organizationUserRoleMapping.getAssignedLevelOrganizationId());
+                        namedPreparedStatement.setInt(DB_SCHEMA_COLUMN_NAME_MANDATORY, organizationUserRoleMapping.isMandatory() ? 1 : 0);
                     }
                 }, organizationUserRoleMappings);
                 return null;
             });
         } catch (TransactionException e) {
-            throw handleServerException(OrganizationUserRoleMgtConstants.ErrorMessages.ERROR_CODE_ORGANIZATION_USER_ROLE_MAPPINGS_ADD_ERROR, "", e);
+            throw handleServerException(ERROR_CODE_ORGANIZATION_USER_ROLE_MAPPINGS_ADD_ERROR, "", e);
         }
     }
 
-    //TODO: Better check this with OrganizationUserRoleManagerImpl addOrganizationUserRoleMapping()
     @Override
     public void addOrganizationUserRoleMappingsWithSp(List<UserRoleMappingUser> userList, String roleId,
                                                       int hybridRoleId, int tenantID, String assignedAt)
             throws OrganizationUserRoleMgtException {
         try (Connection connection = IdentityDatabaseUtil.getUserDBConnection()) {
             connection.setAutoCommit(false);
-            try (CallableStatement callableStatement = connection.prepareCall(
-                    DatabaseConstants.H2Constants.INSERT_INTO_ORGANIZATION_USER_ROLE_MAPPING_USING_SP)) {
+            try (CallableStatement callableStatement = connection.prepareCall(INSERT_INTO_ORGANIZATION_USER_ROLE_MAPPING_USING_SP)) {
                 for (UserRoleMappingUser user : userList) {
                     callableStatement.setString(1, user.getUserId());
                     callableStatement.setString(2, roleId);
@@ -111,13 +128,13 @@ public class OrganizationUserRoleMgtDAOImpl implements OrganizationUserRoleMgtDA
                     LOG.debug("Error occurred while executing the batch insert: ", e);
                 }
                 connection.rollback();
-                throw handleServerException(OrganizationUserRoleMgtConstants.ErrorMessages.ERROR_CODE_ORGANIZATION_USER_ROLE_MAPPINGS_ADD_ERROR, "", e);
+                throw handleServerException(ERROR_CODE_ORGANIZATION_USER_ROLE_MAPPINGS_ADD_ERROR, "", e);
             }
         } catch (Exception e) {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Error occurred while executing the batch insert: ", e);
             }
-            throw handleServerException(OrganizationUserRoleMgtConstants.ErrorMessages.ERROR_CODE_ORGANIZATION_USER_ROLE_MAPPINGS_ADD_ERROR, "", e);
+            throw handleServerException(ERROR_CODE_ORGANIZATION_USER_ROLE_MAPPINGS_ADD_ERROR, "", e);
         }
 
     }
@@ -127,24 +144,24 @@ public class OrganizationUserRoleMgtDAOImpl implements OrganizationUserRoleMgtDA
                                                             List<String> requestedAttributes, int tenantID, String filter)
             throws OrganizationUserRoleMgtServerException {
         boolean paginationReq = offset > -1 || limit > 0;
-        JdbcTemplate jdbcTemplate = Utils.getNewJdbcTemplate();
+
+        NamedJdbcTemplate namedJdbcTemplate = Utils.getNewNamedJdbcTemplate();
         List<OrganizationUserRoleMapping> organizationUserRoleMappings;
         Map<String, List<RoleAssignment>> userRoleAssignments = new HashMap<>();
         List<RoleMember> roleMembers = new ArrayList<>();
 
         try {
-            organizationUserRoleMappings = jdbcTemplate.executeQuery(DatabaseConstants.H2Constants.GET_USERS_BY_ORG_AND_ROLE,
+            organizationUserRoleMappings = namedJdbcTemplate.executeQuery(GET_USERS_BY_ORG_AND_ROLE,
                     (resultSet, rowNumber) ->
                             new OrganizationUserRoleMapping(organizationId,
-                                    resultSet.getString(DatabaseConstants.H2Constants.VIEW_USER_ID_COLUMN), roleId,
-                                    resultSet.getString(DatabaseConstants.H2Constants.VIEW_ASSIGNED_AT_COLUMN),
-                                    resultSet.getString(DatabaseConstants.H2Constants.VIEW_ASSIGNED_AT_NAME_COLUMN),
-                                    resultSet.getInt(DatabaseConstants.H2Constants.VIEW_MANDATORY_COLUMN) == 1),
-                    preparedStatement -> {
-                        int parameterIndex = 0;
-                        preparedStatement.setString(++parameterIndex, organizationId);
-                        preparedStatement.setString(++parameterIndex, roleId);
-                        preparedStatement.setInt(++parameterIndex, tenantID);
+                                    resultSet.getString(VIEW_USER_ID_COLUMN), roleId,
+                                    resultSet.getString(VIEW_ASSIGNED_AT_COLUMN),
+                                    resultSet.getString(VIEW_ASSIGNED_AT_NAME_COLUMN),
+                                    resultSet.getInt(VIEW_MANDATORY_COLUMN) == 1),
+                    namedPreparedStatement -> {
+                        namedPreparedStatement.setString(DB_SCHEMA_COLUMN_NAME_ORG_ID, organizationId);
+                        namedPreparedStatement.setString(DB_SCHEMA_COLUMN_NAME_ROLE_ID, roleId);
+                        namedPreparedStatement.setInt(DB_SCHEMA_COLUMN_NAME_TENANT_ID, tenantID);
                     });
 
             organizationUserRoleMappings.stream().map(organizationUserRoleMapping -> userRoleAssignments
@@ -196,113 +213,94 @@ public class OrganizationUserRoleMgtDAOImpl implements OrganizationUserRoleMgtDA
                 return roleMembers.subList(offset < 0 ? 0 : offset, Math.min(offset + limit, roleMembers.size()));
             }
         } catch (CharonException | IOException | DataAccessException e) {
-            String message = String.format(String.valueOf(OrganizationUserRoleMgtConstants.ErrorMessages.ERROR_CODE_USERS_PER_ORG_ROLE_RETRIEVING_ERROR), roleId,
+            String message = String.format(String.valueOf(ERROR_CODE_USERS_PER_ORG_ROLE_RETRIEVING_ERROR), roleId,
                     organizationId);
             throw new OrganizationUserRoleMgtServerException(message,
-                    OrganizationUserRoleMgtConstants.ErrorMessages.ERROR_CODE_USERS_PER_ORG_ROLE_RETRIEVING_ERROR.getCode(), e);
-            //TODO: Changing exception pipeline to trace errors one by one.
+                    ERROR_CODE_USERS_PER_ORG_ROLE_RETRIEVING_ERROR.getCode(), e);
         }
         return roleMembers;
     }
 
-
-    // TODO: Recursive?
     @Override
-    public void deleteOrganizationsUserRoleMapping(String deleteInvokedOrgId, List<ChildParentAssociation> childParentAssociations,
-                                                   String userId, String roleId, int tenantId, boolean isMandatory)
+    public void deleteOrganizationsUserRoleMapping(Map<String, String> deletionList,
+                                                   String userId, String roleId, int tenantId)
             throws OrganizationUserRoleMgtException {
-        JdbcTemplate jdbcTemplate = Utils.getNewJdbcTemplate();
+        NamedJdbcTemplate namedJdbcTemplate = Utils.getNewNamedJdbcTemplate();
         try {
-            jdbcTemplate.withTransaction(template -> {
-                if (isMandatory) {
-                    template.executeUpdate(queryForMultipleRoleMappingDeletionMandatory(childParentAssociations.size()),
-                            preparedStatement -> {
-                                int parameterIndex = 0;
-                                preparedStatement.setString(++parameterIndex, userId);
-                                preparedStatement.setString(++parameterIndex, roleId);
-                                preparedStatement.setInt(++parameterIndex, tenantId);
-                                preparedStatement.setString(++parameterIndex, deleteInvokedOrgId);
-                                for (ChildParentAssociation childParentAssociation : childParentAssociations) {
-                                    preparedStatement.setString(++parameterIndex, childParentAssociation.getOrganizationId());
-                                }
-                            });
-                } else {
-                    //single query to delete multiple non-mandatory organization-user-role mappings
-                    template.executeUpdate(queryForMultipleRoleMappingDeletionNonMandatory(childParentAssociations.size()),
-                            preparedStatement -> {
-                                int parameterIndex = 0;
-                                preparedStatement.setString(++parameterIndex, userId);
-                                preparedStatement.setString(++parameterIndex, roleId);
-                                preparedStatement.setInt(++parameterIndex, tenantId);
-                                for (ChildParentAssociation childParentAssociation : childParentAssociations) {
-                                    preparedStatement.setString(++parameterIndex, childParentAssociation.getParentOrgId());
-                                    preparedStatement.setString(++parameterIndex, childParentAssociation.getOrganizationId());
-                                }
-                            });
-                }
+            namedJdbcTemplate.withTransaction(template -> {
+                template.executeUpdate(queryForMultipleRoleMappingDeletion(deletionList.size()),
+                        namedPreparedStatement -> {
+                            namedPreparedStatement.setString(DB_SCHEMA_COLUMN_NAME_USER_ID, userId);
+                            namedPreparedStatement.setString(DB_SCHEMA_COLUMN_NAME_ROLE_ID, roleId);
+                            namedPreparedStatement.setInt(DB_SCHEMA_COLUMN_NAME_TENANT_ID, tenantId);
+                            for (Map.Entry<String, String> entry : deletionList.entrySet()) {
+                                namedPreparedStatement.setString(DB_SCHEMA_COLUMN_NAME_ASSIGNED_AT, entry.getValue());
+                                namedPreparedStatement.setString(DB_SCHEMA_COLUMN_NAME_ORG_ID, entry.getKey());
+                            }
+                        });
+
                 return null;
             });
         } catch (TransactionException e) {
             throw new OrganizationUserRoleMgtServerException(String.format(
-                    OrganizationUserRoleMgtConstants.ErrorMessages.ERROR_CODE_ORGANIZATION_USER_ROLE_MAPPINGS_DELETE_ERROR.getMessage(), roleId, userId),
-                    OrganizationUserRoleMgtConstants.ErrorMessages.ERROR_CODE_ORGANIZATION_USER_ROLE_MAPPINGS_DELETE_ERROR.getCode(), e);
+                    ERROR_CODE_ORGANIZATION_USER_ROLE_MAPPINGS_DELETE_ERROR.getMessage(), roleId, userId),
+                    ERROR_CODE_ORGANIZATION_USER_ROLE_MAPPINGS_DELETE_ERROR.getCode(), e);
         }
     }
 
     @Override
     public void deleteOrganizationsUserRoleMappings(String userId, int tenantId) throws OrganizationUserRoleMgtException {
-        JdbcTemplate jdbcTemplate = Utils.getNewJdbcTemplate();
+        NamedJdbcTemplate namedjdbcTemplate = Utils.getNewNamedJdbcTemplate();
         try {
-            jdbcTemplate.withTransaction(template -> {
-                template.executeUpdate(DatabaseConstants.H2Constants.DELETE_ALL_ORGANIZATION_USER_ROLE_MAPPINGS_BY_USERID,
-                        preparedStatement -> {
-                            int parameterIndex = 0;
-                            preparedStatement.setString(++parameterIndex, userId);
-                            preparedStatement.setInt(++parameterIndex, tenantId);
+            namedjdbcTemplate.withTransaction(template -> {
+                template.executeUpdate(DELETE_ALL_ORGANIZATION_USER_ROLE_MAPPINGS_BY_USERID,
+                        namedPreparedStatement -> {
+                            namedPreparedStatement.setString(DB_SCHEMA_COLUMN_NAME_USER_ID, userId);
+                            namedPreparedStatement.setInt(DB_SCHEMA_COLUMN_NAME_TENANT_ID, tenantId);
                         });
                 return null;
             });
         } catch (TransactionException e) {
             throw new OrganizationUserRoleMgtServerException(
-                    String.format(OrganizationUserRoleMgtConstants.ErrorMessages.ERROR_CODE_ORGANIZATION_USER_ROLE_MAPPINGS_DELETE_PER_USER_ERROR.getMessage(), userId),
-                    OrganizationUserRoleMgtConstants.ErrorMessages.ERROR_CODE_ORGANIZATION_USER_ROLE_MAPPINGS_DELETE_PER_USER_ERROR.getCode(), e);
+                    String.format(ERROR_CODE_ORGANIZATION_USER_ROLE_MAPPINGS_DELETE_PER_USER_ERROR.getMessage(), userId),
+                    ERROR_CODE_ORGANIZATION_USER_ROLE_MAPPINGS_DELETE_PER_USER_ERROR.getCode(), e);
         }
     }
 
     @Override
     public List<Role> getRolesByOrganizationAndUser(String organizationId, String userId, int tenantID)
             throws OrganizationUserRoleMgtServerException {
-        JdbcTemplate jdbcTemplate = Utils.getNewJdbcTemplate();
+        NamedJdbcTemplate namedJdbcTemplate = Utils.getNewNamedJdbcTemplate();
         List<Role> roles;
         try {
-            roles = jdbcTemplate.executeQuery(DatabaseConstants.H2Constants.GET_ROLES_BY_ORG_AND_USER,
-                    (resultSet, rowNumber) -> new Role(resultSet.getString(DatabaseConstants.H2Constants.VIEW_ROLE_ID_COLUMN),
-                            "Internal/" + resultSet.getString(DatabaseConstants.H2Constants.VIEW_ROLE_NAME_COLUMN)),
-                    preparedStatement -> {
-                        int parameterIndex = 0;
-                        preparedStatement.setString(++parameterIndex, organizationId);
-                        preparedStatement.setString(++parameterIndex, userId);
-                        preparedStatement.setInt(++parameterIndex, tenantID);
+            roles = namedJdbcTemplate.executeQuery(GET_ROLES_BY_ORG_AND_USER,
+                    (resultSet, rowNumber) -> new Role(resultSet.getString(VIEW_ROLE_ID_COLUMN),
+                            "Internal/" + resultSet.getString(VIEW_ROLE_NAME_COLUMN)),
+                    namedPreparedStatement -> {
+                        namedPreparedStatement.setString(DB_SCHEMA_COLUMN_NAME_ORG_ID, organizationId);
+                        namedPreparedStatement.setString(DB_SCHEMA_COLUMN_NAME_USER_ID, userId);
+                        namedPreparedStatement.setInt(DB_SCHEMA_COLUMN_NAME_TENANT_ID, tenantID);
                     });
         } catch (DataAccessException e) {
             String message =
-                    String.format(String.valueOf(OrganizationUserRoleMgtConstants.ErrorMessages.ERROR_CODE_ROLES_PER_ORG_USER_RETRIEVING_ERROR.getMessage()), userId,
+                    String.format(String.valueOf(ERROR_CODE_ROLES_PER_ORG_USER_RETRIEVING_ERROR.getMessage()), userId,
                             organizationId);
-            throw new OrganizationUserRoleMgtServerException(message,
-                    OrganizationUserRoleMgtConstants.ErrorMessages.ERROR_CODE_ROLES_PER_ORG_USER_RETRIEVING_ERROR.getCode(), e);
+            throw new OrganizationUserRoleMgtServerException(message, ERROR_CODE_ROLES_PER_ORG_USER_RETRIEVING_ERROR.getCode(), e);
         }
         return roles;
     }
 
     @Override
     //TODO: Need to change accordingly.
-    public void updateMandatoryProperty(String organizationId, String userId, String roleId, List<OrganizationUserRoleMapping> organizationUserRoleMappingsToAdd,
+    public void updateMandatoryProperty(String organizationId, String userId, String roleId,
+                                        List<OrganizationUserRoleMapping> organizationUserRoleMappingsToAdd,
                                         List<OrganizationUserRoleMapping> organizationUserRoleMappingsToUpdate,
-                                        List<String> childOrganizationIdsToDeleteRecords, int tenantId)
+                                        Map<String, String> childOrganizationIdsToDeleteRecords,
+                                        int tenantId)
             throws OrganizationUserRoleMgtServerException {
-        JdbcTemplate jdbcTemplate = Utils.getNewJdbcTemplate();
+        NamedJdbcTemplate namedJdbcTemplate = Utils.getNewNamedJdbcTemplate();
         try {
-            jdbcTemplate.withTransaction(template -> {
+            namedJdbcTemplate.withTransaction(template -> {
                 /*
                  We are getting the organization-user-role mappings accordingly for all the scenarios mentioned in @{OrganizationUserRoleManagerImpl}
                  Therefore, we only need to add the user role mappings, delete the user role mappings and update the user role mappings accordingly.
@@ -310,76 +308,55 @@ public class OrganizationUserRoleMgtDAOImpl implements OrganizationUserRoleMgtDA
                 // add organization-user-role mappings
                 if (CollectionUtils.isNotEmpty(organizationUserRoleMappingsToAdd)) {
                     template.executeInsert(queryForMultipleInserts(organizationUserRoleMappingsToAdd.size()),
-                            preparedStatement -> {
-                                int parameterIndex = 0;
-                                for (OrganizationUserRoleMapping organizationUserRoleMapping
-                                        : organizationUserRoleMappingsToAdd) {
-                                    preparedStatement.setString(++parameterIndex, Utils.generateUniqueID());
-                                    preparedStatement
-                                            .setString(++parameterIndex, organizationUserRoleMapping.getUserId());
-                                    preparedStatement
-                                            .setString(++parameterIndex, organizationUserRoleMapping.getRoleId());
-                                    preparedStatement
-                                            .setInt(++parameterIndex, organizationUserRoleMapping.getHybridRoleId());
-                                    preparedStatement.setInt(++parameterIndex, tenantId);
-                                    preparedStatement
-                                            .setString(++parameterIndex,
-                                                    organizationUserRoleMapping.getOrganizationId());
-                                    preparedStatement.setString(++parameterIndex,
-                                            organizationUserRoleMapping.getAssignedLevelOrganizationId());
-                                    preparedStatement
-                                            .setInt(++parameterIndex,
-                                                    organizationUserRoleMapping.isMandatory() ? 1 : 0);
+                            namedPreparedStatement -> {
+                                for (OrganizationUserRoleMapping organizationUserRoleMapping : organizationUserRoleMappingsToAdd) {
+                                    namedPreparedStatement.setString(DB_SCHEMA_COLUMN_NAME_ID, Utils.generateUniqueID());
+                                    namedPreparedStatement.setString(DB_SCHEMA_COLUMN_NAME_USER_ID, organizationUserRoleMapping.getUserId());
+                                    namedPreparedStatement.setString(DB_SCHEMA_COLUMN_NAME_ROLE_ID, organizationUserRoleMapping.getRoleId());
+                                    namedPreparedStatement.setInt(DB_SCHEMA_COLUMN_NAME_HYBRID_ROLE_ID, organizationUserRoleMapping.getHybridRoleId());
+                                    namedPreparedStatement.setInt(DB_SCHEMA_COLUMN_NAME_TENANT_ID, tenantId);
+                                    namedPreparedStatement.setString(DB_SCHEMA_COLUMN_NAME_ORG_ID, organizationUserRoleMapping.getOrganizationId());
+                                    namedPreparedStatement.setString(DB_SCHEMA_COLUMN_NAME_ASSIGNED_AT, organizationUserRoleMapping.getAssignedLevelOrganizationId());
+                                    namedPreparedStatement.setInt(DB_SCHEMA_COLUMN_NAME_MANDATORY, organizationUserRoleMapping.isMandatory() ? 1 : 0);
                                 }
                             }, organizationUserRoleMappingsToAdd, false);
                 }
-                if (CollectionUtils.isNotEmpty(childOrganizationIdsToDeleteRecords)) {
+                //delete organization-user-role mappings
+                if (MapUtils.isNotEmpty(childOrganizationIdsToDeleteRecords)) {
                     template.executeUpdate(
-                            queryForMultipleRoleMappingDeletionMandatory(childOrganizationIdsToDeleteRecords.size()),
-                            preparedStatement -> {
-                                int parameterIndex = 0;
-                                preparedStatement.setString(++parameterIndex, userId);
-                                preparedStatement.setString(++parameterIndex, roleId);
-                                preparedStatement.setInt(++parameterIndex, tenantId);
-                                preparedStatement.setString(++parameterIndex, organizationId);
-                                for (String childOrgId : childOrganizationIdsToDeleteRecords) {
-                                    preparedStatement.setString(++parameterIndex, childOrgId);
+                            queryForMultipleRoleMappingDeletion(childOrganizationIdsToDeleteRecords.size()),
+                            namedPreparedStatement -> {
+                                namedPreparedStatement.setString(DB_SCHEMA_COLUMN_NAME_USER_ID, userId);
+                                namedPreparedStatement.setString(DB_SCHEMA_COLUMN_NAME_ROLE_ID, roleId);
+                                namedPreparedStatement.setInt(DB_SCHEMA_COLUMN_NAME_TENANT_ID, tenantId);
+                                //assignedAt and orgId
+                                for (Map.Entry<String, String> childOrgId : childOrganizationIdsToDeleteRecords.entrySet()) {
+                                    namedPreparedStatement.setString(DB_SCHEMA_COLUMN_NAME_ASSIGNED_AT, childOrgId.getValue());
+                                    namedPreparedStatement.setString(DB_SCHEMA_COLUMN_NAME_ORG_ID, childOrgId.getKey());
                                 }
                             });
                 }
+                //update organization-user-role mappings
                 if (CollectionUtils.isNotEmpty(organizationUserRoleMappingsToUpdate)) {
-                    template.executeUpdate(DatabaseConstants.H2Constants.UPDATE_ORGANIZATION_USER_ROLE_MAPPING_INHERIT_PROPERTY, preparedStatement -> {
-
+                    template.executeUpdate(UPDATE_ORGANIZATION_USER_ROLE_MAPPING_MANDATORY_PROPERTY, namedPreparedStatement -> {
                         for (OrganizationUserRoleMapping organizationUserRoleMapping : organizationUserRoleMappingsToUpdate) {
-                            int parameterIndex = 0;
-                            //TODO: Fix this
-                            preparedStatement.setInt(++parameterIndex, 1);
-                            preparedStatement.setString(++parameterIndex, userId);
-                            preparedStatement.setString(++parameterIndex, roleId);
-                            preparedStatement.setString(++parameterIndex, organizationId);
-                            preparedStatement.setString(++parameterIndex, organizationId);
-                            preparedStatement.setInt(++parameterIndex, tenantId);
+                            namedPreparedStatement.setInt(DB_SCHEMA_COLUMN_NAME_MANDATORY, organizationUserRoleMapping.isMandatory() ? 1 : 0);
+                            namedPreparedStatement.setString(DB_SCHEMA_COLUMN_NAME_USER_ID, organizationUserRoleMapping.getUserId());
+                            namedPreparedStatement.setString(DB_SCHEMA_COLUMN_NAME_ROLE_ID, organizationUserRoleMapping.getRoleId());
+                            namedPreparedStatement.setString(DB_SCHEMA_COLUMN_NAME_ORG_ID, organizationUserRoleMapping.getOrganizationId());
+                            namedPreparedStatement.setString(DB_SCHEMA_COLUMN_NAME_ASSIGNED_AT, organizationUserRoleMapping.getAssignedLevelOrganizationId());
+                            namedPreparedStatement.setInt(DB_SCHEMA_COLUMN_NAME_TENANT_ID, tenantId);
                         }
                     });
                 }
-                /*template.executeUpdate(DatabaseConstants.H2Constants.UPDATE_ORGANIZATION_USER_ROLE_MAPPING_INHERIT_PROPERTY, preparedStatement -> {
-                    int parameterIndex = 0;
-                    preparedStatement.setInt(++parameterIndex, mandatory ? 1 : 0);
-                    preparedStatement.setString(++parameterIndex, userId);
-                    preparedStatement.setString(++parameterIndex, roleId);
-                    preparedStatement.setString(++parameterIndex, organizationID);
-                    preparedStatement.setString(++parameterIndex, organizationID);
-                    preparedStatement.setInt(++parameterIndex, tenantId);
-                });*/
 
                 return null;
             });
         } catch (TransactionException e) {
             String message =
-                    String.format(String.valueOf(OrganizationUserRoleMgtConstants.ErrorMessages.ERROR_CODE_ORGANIZATION_USER_ROLE_MAPPINGS_UPDATE_ERROR),
+                    String.format(String.valueOf(ERROR_CODE_ORGANIZATION_USER_ROLE_MAPPINGS_UPDATE_ERROR),
                             organizationId, userId, roleId);
-            throw new OrganizationUserRoleMgtServerException(message,
-                    OrganizationUserRoleMgtConstants.ErrorMessages.ERROR_CODE_ORGANIZATION_USER_ROLE_MAPPINGS_UPDATE_ERROR.getCode(), e);
+            throw new OrganizationUserRoleMgtServerException(message, ERROR_CODE_ORGANIZATION_USER_ROLE_MAPPINGS_UPDATE_ERROR.getCode(), e);
         }
     }
 
@@ -387,28 +364,26 @@ public class OrganizationUserRoleMgtDAOImpl implements OrganizationUserRoleMgtDA
     @Override
     public boolean isOrganizationUserRoleMappingExists(String organizationId, String userId, String roleId, String assignedLevel,
                                                        boolean mandatory, int tenantId) throws OrganizationUserRoleMgtException {
-        JdbcTemplate jdbcTemplate = Utils.getNewJdbcTemplate();
+        NamedJdbcTemplate namedJdbcTemplate = Utils.getNewNamedJdbcTemplate();
         int mappingsCount = 0;
         try {
-            mappingsCount = jdbcTemplate
+            mappingsCount = namedJdbcTemplate
                     .fetchSingleRecord(buildIsRoleMappingExistsQuery(assignedLevel, mandatory),
                             (resultSet, rowNumber) ->
-                                    resultSet.getInt(DatabaseConstants.H2Constants.COUNT_COLUMN_NAME),
-                            preparedStatement -> {
-                                int parameterIndex = 0;
-                                preparedStatement.setString(++parameterIndex, userId);
-                                preparedStatement.setString(++parameterIndex, roleId);
-                                preparedStatement.setInt(++parameterIndex, tenantId);
-                                preparedStatement.setString(++parameterIndex, organizationId);
-                                preparedStatement.setString(++parameterIndex, assignedLevel);
-                                preparedStatement.setInt(++parameterIndex, mandatory ? 1 : 0);
+                                    resultSet.getInt(COUNT_COLUMN_NAME),
+                            namedPreparedStatement -> {
+                                namedPreparedStatement.setString(DB_SCHEMA_COLUMN_NAME_USER_ID, userId);
+                                namedPreparedStatement.setString(DB_SCHEMA_COLUMN_NAME_ROLE_ID, roleId);
+                                namedPreparedStatement.setInt(DB_SCHEMA_COLUMN_NAME_TENANT_ID, tenantId);
+                                namedPreparedStatement.setString(DB_SCHEMA_COLUMN_NAME_ORG_ID, organizationId);
+                                namedPreparedStatement.setString(DB_SCHEMA_COLUMN_NAME_ASSIGNED_AT, assignedLevel);
+                                namedPreparedStatement.setInt(DB_SCHEMA_COLUMN_NAME_MANDATORY, mandatory ? 1 : 0);
                             });
         } catch (DataAccessException e) {
             String message =
-                    String.format(String.valueOf(OrganizationUserRoleMgtConstants.ErrorMessages.ERROR_CODE_ORGANIZATION_USER_ROLE_MAPPINGS_RETRIEVING_ERROR), roleId,
+                    String.format(String.valueOf(ERROR_CODE_ORGANIZATION_USER_ROLE_MAPPINGS_RETRIEVING_ERROR), roleId,
                             userId, organizationId);
-            throw new OrganizationUserRoleMgtServerException(message,
-                    OrganizationUserRoleMgtConstants.ErrorMessages.ERROR_CODE_ORGANIZATION_USER_ROLE_MAPPINGS_RETRIEVING_ERROR.getCode(), e);
+            throw new OrganizationUserRoleMgtServerException(message,ERROR_CODE_ORGANIZATION_USER_ROLE_MAPPINGS_RETRIEVING_ERROR.getCode(), e);
         }
         return mappingsCount > 0;
     }
@@ -416,74 +391,71 @@ public class OrganizationUserRoleMgtDAOImpl implements OrganizationUserRoleMgtDA
     @Override
     public int getDirectlyAssignedOrganizationUserRoleMappingInheritance(String organizationId, String userId, String roleId, int tenantId) throws OrganizationUserRoleMgtException {
         // Since this method is to get directly assigned organization-user-role mapping, assignedLevel(an org. id) = @param{organizationId}
-        JdbcTemplate jdbcTemplate = Utils.getNewJdbcTemplate();
+        NamedJdbcTemplate namedJdbcTemplate = Utils.getNewNamedJdbcTemplate();
         int directlyAssignedRoleMappingInheritance = -1;
         try {
-            boolean mappingExists = jdbcTemplate
+            boolean mappingExists = namedJdbcTemplate
                     .fetchSingleRecord(buildIsRoleMappingExistsQuery(organizationId, false),
                             // We are not checking whether the role is mandatory or not. We want to get a user role mapping on
                             // params organizationId, userId, roleId, tenantId and assignedLevel
                             (resultSet, rowNumber) ->
-                                    resultSet.getInt(DatabaseConstants.H2Constants.COUNT_COLUMN_NAME) == 1,
-                            preparedStatement -> {
-                                int parameterIndex = 0;
-                                preparedStatement.setString(++parameterIndex, userId);
-                                preparedStatement.setString(++parameterIndex, roleId);
-                                preparedStatement.setInt(++parameterIndex, tenantId);
-                                preparedStatement.setString(++parameterIndex, organizationId);
-                                preparedStatement.setString(++parameterIndex, organizationId);
+                                    resultSet.getInt(COUNT_COLUMN_NAME) == 1,
+                            namedPreparedStatement -> {
+                                namedPreparedStatement.setString(DB_SCHEMA_COLUMN_NAME_USER_ID, userId);
+                                namedPreparedStatement.setString(DB_SCHEMA_COLUMN_NAME_ROLE_ID, roleId);
+                                namedPreparedStatement.setInt(DB_SCHEMA_COLUMN_NAME_TENANT_ID, tenantId);
+                                namedPreparedStatement.setString(DB_SCHEMA_COLUMN_NAME_ORG_ID, organizationId);
+                                namedPreparedStatement.setString(DB_SCHEMA_COLUMN_NAME_ASSIGNED_AT, organizationId);
                             });
             if (!mappingExists) {
                 return directlyAssignedRoleMappingInheritance;
             }
             directlyAssignedRoleMappingInheritance =
-                    jdbcTemplate.fetchSingleRecord(DatabaseConstants.H2Constants.GET_DIRECTLY_ASSIGNED_ORGANIZATION_USER_ROLE_MAPPING_LINK,
-                            (resultSet, rowNumber) -> resultSet.getInt(DatabaseConstants.H2Constants.VIEW_MANDATORY_COLUMN),
-                            preparedStatement -> {
-                                int parameterIndex = 0;
-                                preparedStatement.setString(++parameterIndex, userId);
-                                preparedStatement.setString(++parameterIndex, roleId);
-                                preparedStatement.setInt(++parameterIndex, tenantId);
-                                preparedStatement.setString(++parameterIndex, organizationId);
-                                preparedStatement.setString(++parameterIndex, organizationId);
+                    namedJdbcTemplate.fetchSingleRecord(GET_DIRECTLY_ASSIGNED_ORGANIZATION_USER_ROLE_MAPPING_LINK,
+                            (resultSet, rowNumber) -> resultSet.getInt(VIEW_MANDATORY_COLUMN),
+                            namedPreparedStatement -> {
+                                namedPreparedStatement.setString(DB_SCHEMA_COLUMN_NAME_USER_ID, userId);
+                                namedPreparedStatement.setString(DB_SCHEMA_COLUMN_NAME_ROLE_ID, roleId);
+                                namedPreparedStatement.setInt(DB_SCHEMA_COLUMN_NAME_TENANT_ID, tenantId);
+                                namedPreparedStatement.setString(DB_SCHEMA_COLUMN_NAME_ORG_ID, organizationId);
+                                namedPreparedStatement.setString(DB_SCHEMA_COLUMN_NAME_ASSIGNED_AT, organizationId);
                             });
         } catch (DataAccessException e) {
             String message =
-                    String.format(String.valueOf(OrganizationUserRoleMgtConstants.ErrorMessages.ERROR_CODE_ORGANIZATION_USER_ROLE_MAPPINGS_RETRIEVING_ERROR), roleId,
+                    String.format(String.valueOf(ERROR_CODE_ORGANIZATION_USER_ROLE_MAPPINGS_RETRIEVING_ERROR), roleId,
                             userId, organizationId);
             throw new OrganizationUserRoleMgtServerException(message,
-                    OrganizationUserRoleMgtConstants.ErrorMessages.ERROR_CODE_ORGANIZATION_USER_ROLE_MAPPINGS_RETRIEVING_ERROR.getCode(), e);
+                    ERROR_CODE_ORGANIZATION_USER_ROLE_MAPPINGS_RETRIEVING_ERROR.getCode(), e);
         }
         return directlyAssignedRoleMappingInheritance;
     }
 
     @Override
     public Integer getRoleIdBySCIMGroupName(String roleName, int tenantId) throws OrganizationUserRoleMgtServerException {
-        JdbcTemplate jdbcTemplate = Utils.getNewJdbcTemplate();
+        NamedJdbcTemplate namedJdbcTemplate = Utils.getNewNamedJdbcTemplate();
         try {
-            return jdbcTemplate.fetchSingleRecord(DatabaseConstants.H2Constants.GET_ROLE_ID_BY_SCIM_GROUP_NAME,
+            return namedJdbcTemplate.fetchSingleRecord(GET_ROLE_ID_BY_SCIM_GROUP_NAME,
                     (resultSet, rowNumber) ->
                             resultSet.getInt(DatabaseConstants.H2Constants.VIEW_ID_COLUMN),
-                    preparedStatement -> {
-                        int parameterIndex = 0;
-                        preparedStatement.setString(++parameterIndex, roleName);
-                        preparedStatement.setInt(++parameterIndex, tenantId);
+                    namedPreparedStatement -> {
+                        namedPreparedStatement.setString(DB_SCHEMA_COLUMN_NAME_ROLE_NAME, roleName);
+                        namedPreparedStatement.setInt(DB_SCHEMA_COLUMN_NAME_TENANT_ID, tenantId);
                     });
         } catch (DataAccessException e) {
-            throw handleServerException(OrganizationUserRoleMgtConstants.ErrorMessages.ERROR_CODE_HYBRID_ROLE_ID_RETRIEVING_ERROR, roleName);
+            throw handleServerException(ERROR_CODE_HYBRID_ROLE_ID_RETRIEVING_ERROR, roleName);
         }
     }
 
     @Override
     public List<ChildParentAssociation> getAllSubOrganizations(String organizationId) throws OrganizationUserRoleMgtException {
-        JdbcTemplate jdbcTemplate = Utils.getNewJdbcTemplate();
+        NamedJdbcTemplate namedJdbcTemplate = Utils.getNewNamedJdbcTemplate();
 
         try {
-            List<ChildParentAssociation> childParentAssociations = jdbcTemplate.executeQuery(DatabaseConstants.H2Constants.FIND_ALL_CHILD_ORG_IDS,
+            List<ChildParentAssociation> childParentAssociations = namedJdbcTemplate.executeQuery(FIND_ALL_CHILD_ORG_IDS,
                     (resultSet, rowNumber) ->
-                            new ChildParentAssociation(resultSet.getString(DatabaseConstants.H2Constants.VIEW_ID_COLUMN),
-                                    resultSet.getString(DatabaseConstants.H2Constants.VIEW_PARENT_ID_COLUMN)),
-                    preparedStatement -> preparedStatement.setString(1, organizationId));
+                            new ChildParentAssociation(resultSet.getString(VIEW_ID_COLUMN),
+                                    resultSet.getString(VIEW_PARENT_ID_COLUMN)),
+                    namedPreparedStatement -> namedPreparedStatement.setString(DB_SCHEMA_COLUMN_NAME_PARENT_ID, organizationId));
             return childParentAssociations;
         } catch (DataAccessException e) {
             throw handleServerException(ERROR_CODE_ORGANIZATION_GET_CHILDREN_ERROR, "Organization Id " + organizationId,
@@ -493,32 +465,30 @@ public class OrganizationUserRoleMgtDAOImpl implements OrganizationUserRoleMgtDA
 
     @Override
     public int getMandatoryOfAnyOrganizationUserRoleMapping(String organizationId, String userId, String roleId, int tenantId) throws OrganizationUserRoleMgtException {
-        JdbcTemplate jdbcTemplate = Utils.getNewJdbcTemplate();
+        NamedJdbcTemplate namedJdbcTemplate = Utils.getNewNamedJdbcTemplate();
         int mandatoryOfAnyOrganizationUserRoleMapping = -1;
         try {
-            boolean mappingExists = jdbcTemplate
+            boolean mappingExists = namedJdbcTemplate
                     .fetchSingleRecord(buildIsRoleMappingExistsQuery(null, false),
                             (resultSet, rowNumber) ->
-                                    resultSet.getInt(DatabaseConstants.H2Constants.COUNT_COLUMN_NAME) == 1,
-                            preparedStatement -> {
-                                int parameterIndex = 0;
-                                preparedStatement.setString(++parameterIndex, userId);
-                                preparedStatement.setString(++parameterIndex, roleId);
-                                preparedStatement.setInt(++parameterIndex, tenantId);
-                                preparedStatement.setString(++parameterIndex, organizationId);
+                                    resultSet.getInt(COUNT_COLUMN_NAME) == 1,
+                            namedPreparedStatement -> {
+                                namedPreparedStatement.setString(DB_SCHEMA_COLUMN_NAME_USER_ID, userId);
+                                namedPreparedStatement.setString(DB_SCHEMA_COLUMN_NAME_ROLE_ID, roleId);
+                                namedPreparedStatement.setInt(DB_SCHEMA_COLUMN_NAME_TENANT_ID, tenantId);
+                                namedPreparedStatement.setString(DB_SCHEMA_COLUMN_NAME_ORG_ID, organizationId);
                             });
             if (!mappingExists) {
                 return mandatoryOfAnyOrganizationUserRoleMapping;
             }
             mandatoryOfAnyOrganizationUserRoleMapping =
-                    jdbcTemplate.fetchSingleRecord(DatabaseConstants.H2Constants.GET_MANDATORY_VALUE_OF_ORGANIZATION_USER_ROLE_MAPPING_LINK,
-                            (resultSet, rowNumber) -> resultSet.getInt(DatabaseConstants.H2Constants.VIEW_MANDATORY_COLUMN),
-                            preparedStatement -> {
-                                int parameterIndex = 0;
-                                preparedStatement.setString(++parameterIndex, userId);
-                                preparedStatement.setString(++parameterIndex, roleId);
-                                preparedStatement.setInt(++parameterIndex, tenantId);
-                                preparedStatement.setString(++parameterIndex, organizationId);
+                    namedJdbcTemplate.fetchSingleRecord(GET_MANDATORY_VALUE_OF_ORGANIZATION_USER_ROLE_MAPPING_LINK,
+                            (resultSet, rowNumber) -> resultSet.getInt(VIEW_MANDATORY_COLUMN),
+                            namedPreparedStatement -> {
+                                namedPreparedStatement.setString(DB_SCHEMA_COLUMN_NAME_USER_ID, userId);
+                                namedPreparedStatement.setString(DB_SCHEMA_COLUMN_NAME_ROLE_ID, roleId);
+                                namedPreparedStatement.setInt(DB_SCHEMA_COLUMN_NAME_TENANT_ID, tenantId);
+                                namedPreparedStatement.setString(DB_SCHEMA_COLUMN_NAME_ORG_ID, organizationId);
                             });
         } catch (DataAccessException e) {
             String message =
@@ -532,77 +502,61 @@ public class OrganizationUserRoleMgtDAOImpl implements OrganizationUserRoleMgtDA
 
     @Override
     public String getAssignedAtOfAnyOrganizationUserRoleMapping(String organizationId, String userId, String roleId, int tenantId) throws OrganizationUserRoleMgtException {
-        JdbcTemplate jdbcTemplate = Utils.getNewJdbcTemplate();
-        String assignedAt = "";
+        NamedJdbcTemplate namedJdbcTemplate = Utils.getNewNamedJdbcTemplate();
+        String assignedAt = null;
         try {
-            boolean mappingExists = jdbcTemplate
+            boolean mappingExists = namedJdbcTemplate
                     .fetchSingleRecord(buildIsRoleMappingExistsQuery(null, false),
                             (resultSet, rowNumber) ->
-                                    resultSet.getInt(DatabaseConstants.H2Constants.COUNT_COLUMN_NAME) == 1,
-                            preparedStatement -> {
-                                int parameterIndex = 0;
-                                preparedStatement.setString(++parameterIndex, userId);
-                                preparedStatement.setString(++parameterIndex, roleId);
-                                preparedStatement.setInt(++parameterIndex, tenantId);
-                                preparedStatement.setString(++parameterIndex, organizationId);
+                                    resultSet.getInt(COUNT_COLUMN_NAME) == 1,
+                            namedPreparedStatement -> {
+                                namedPreparedStatement.setString(DB_SCHEMA_COLUMN_NAME_USER_ID, userId);
+                                namedPreparedStatement.setString(DB_SCHEMA_COLUMN_NAME_ROLE_ID, roleId);
+                                namedPreparedStatement.setInt(DB_SCHEMA_COLUMN_NAME_TENANT_ID, tenantId);
+                                namedPreparedStatement.setString(DB_SCHEMA_COLUMN_NAME_ORG_ID, organizationId);
                             });
             if (!mappingExists) {
                 return assignedAt;
             }
             assignedAt =
-                    jdbcTemplate.fetchSingleRecord(DatabaseConstants.H2Constants.GET_ASSIGNED_AT_VALUE_OF_ORGANIZATION_USER_ROLE_MAPPING_LINK,
-                            (resultSet, rowNumber) -> resultSet.getString(DatabaseConstants.H2Constants.VIEW_ASSIGNED_AT_COLUMN),
-                            preparedStatement -> {
-                                int parameterIndex = 0;
-                                preparedStatement.setString(++parameterIndex, userId);
-                                preparedStatement.setString(++parameterIndex, roleId);
-                                preparedStatement.setInt(++parameterIndex, tenantId);
-                                preparedStatement.setString(++parameterIndex, organizationId);
+                    namedJdbcTemplate.fetchSingleRecord(GET_ASSIGNED_AT_VALUE_OF_ORGANIZATION_USER_ROLE_MAPPING_LINK,
+                            (resultSet, rowNumber) -> resultSet.getString(VIEW_ASSIGNED_AT_COLUMN),
+                            namedPreparedStatement -> {
+                                namedPreparedStatement.setString(DB_SCHEMA_COLUMN_NAME_USER_ID, userId);
+                                namedPreparedStatement.setString(DB_SCHEMA_COLUMN_NAME_ROLE_ID, roleId);
+                                namedPreparedStatement.setInt(DB_SCHEMA_COLUMN_NAME_TENANT_ID, tenantId);
+                                namedPreparedStatement.setString(DB_SCHEMA_COLUMN_NAME_ORG_ID, organizationId);
                             });
         } catch (DataAccessException e) {
             String message =
-                    String.format(String.valueOf(OrganizationUserRoleMgtConstants.ErrorMessages.ERROR_CODE_ORGANIZATION_USER_ROLE_MAPPINGS_RETRIEVING_ERROR), roleId,
+                    String.format(String.valueOf(ERROR_CODE_ORGANIZATION_USER_ROLE_MAPPINGS_RETRIEVING_ERROR), roleId,
                             userId, organizationId);
             throw new OrganizationUserRoleMgtServerException(message,
-                    OrganizationUserRoleMgtConstants.ErrorMessages.ERROR_CODE_ORGANIZATION_USER_ROLE_MAPPINGS_RETRIEVING_ERROR.getCode(), e);
+                    ERROR_CODE_ORGANIZATION_USER_ROLE_MAPPINGS_RETRIEVING_ERROR.getCode(), e);
         }
         return assignedAt;
     }
 
     private String queryForMultipleInserts(Integer numberOfMapings) {
         StringBuilder sb = new StringBuilder();
-        sb.append(DatabaseConstants.H2Constants.INSERT_ALL);
+        sb.append(INSERT_ALL);
 
         for (int i = 0; i < numberOfMapings; i++) {
-            sb.append(DatabaseConstants.H2Constants.INSERT_INTO_ORGANIZATION_USER_ROLE_MAPPING);
+            sb.append(INSERT_INTO_ORGANIZATION_USER_ROLE_MAPPING);
         }
-        sb.append(DatabaseConstants.H2Constants.SELECT_DUMMY_RECORD);
+        sb.append(SELECT_DUMMY_RECORD);
         return sb.toString();
     }
 
-    private String queryForMultipleRoleMappingDeletionMandatory(int numberOfOrganizations) {
+    private String queryForMultipleRoleMappingDeletion(int numberOfOrganizations) {
         StringBuilder sb = new StringBuilder();
-        sb.append(DatabaseConstants.H2Constants.DELETE_ORGANIZATION_USER_ROLE_MAPPINGS_ASSIGNED_AT_ORG_LEVEL);
-        sb.append(DatabaseConstants.H2Constants.AND).append("(");
+        sb.append(DELETE_ORGANIZATION_USER_ROLE_MAPPINGS_ASSIGNED_AT_ORG_LEVEL);
+        sb.append(AND).append("(");
         for (int i = 0; i < numberOfOrganizations; i++) {
-            sb.append(DatabaseConstants.H2Constants.ORG_ID_ADDING);
+            sb.append("(").append(ASSIGNED_AT_ADDING).append(AND)
+                    .append(ORG_ID_ADDING).append(")");
             if (i != numberOfOrganizations - 1) {
-                sb.append(DatabaseConstants.H2Constants.OR);
-            }
-        }
-        sb.append(")");
-        return sb.toString();
-    }
-
-    private String queryForMultipleRoleMappingDeletionNonMandatory(int numberOfOrganizations) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(DatabaseConstants.H2Constants.DELETE_ORGANIZATION_USER_ROLE_MAPPINGS_ASSIGNED_AT_ORG_LEVEL_NON_MANDATORY);
-        sb.append(DatabaseConstants.H2Constants.AND).append("(");
-        for (int i = 0; i < numberOfOrganizations; i++) {
-            sb.append("(").append(DatabaseConstants.H2Constants.ASSIGNED_AT_ADDING).append(DatabaseConstants.H2Constants.AND)
-                    .append(DatabaseConstants.H2Constants.ORG_ID_ADDING).append(")");
-            if (i != numberOfOrganizations - 1) {
-                sb.append(DatabaseConstants.H2Constants.OR);
+                sb.append(OR);
             }
         }
         sb.append(")");
@@ -612,12 +566,12 @@ public class OrganizationUserRoleMgtDAOImpl implements OrganizationUserRoleMgtDA
     private String buildIsRoleMappingExistsQuery(String assignedLevel, boolean checkMandatory) {
 
         StringBuilder sb = new StringBuilder();
-        sb.append(DatabaseConstants.H2Constants.GET_ORGANIZATION_USER_ROLE_MAPPING);
+        sb.append(GET_ORGANIZATION_USER_ROLE_MAPPING);
         if (StringUtils.isNotEmpty(assignedLevel)) {
-            sb.append(DatabaseConstants.H2Constants.AND).append(DatabaseConstants.H2Constants.ASSIGNED_AT_ADDING);
+            sb.append(AND).append(ASSIGNED_AT_ADDING);
         }
         if (checkMandatory) {
-            sb.append(DatabaseConstants.H2Constants.AND).append(DatabaseConstants.H2Constants.MANDATORY_ADDING);
+            sb.append(AND).append(MANDATORY_ADDING);
         }
         return sb.toString();
     }
