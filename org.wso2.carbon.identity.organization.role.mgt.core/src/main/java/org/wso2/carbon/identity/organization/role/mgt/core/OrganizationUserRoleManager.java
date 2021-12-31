@@ -29,7 +29,7 @@ import java.util.List;
 public interface OrganizationUserRoleManager {
     void addOrganizationUserRoleMappings(String organizationId, UserRoleMapping userRoleMappings)
             throws OrganizationUserRoleMgtException;
-    List<RoleMember> getUsersByOrganizationAndRole(String organizationID, String roleId, int offset, int limit,
+    List<RoleMember> getUsersByOrganizationAndRole(String organizationId, String roleId, int offset, int limit,
                                                    List<String> requestedAttributes, String filter)
             throws OrganizationUserRoleMgtException;
 
