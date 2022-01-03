@@ -212,22 +212,22 @@
                 </dependencies>
             </plugin>-->
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
-                <version>3.2.2</version>
                 <configuration>
                     <webResources>
                         <resource>
                             <!-- this is relative to the pom.xml directory -->
-                            <directory>src/main/resources/</directory>
+                            <directory>src/main/webapp/</directory>
                         </resource>
                     </webResources>
                     <warName>api#identity#organization-mgt#role-mgt#v1.0</warName>
+                    <webXml>src/main/webapp/WEB-INF/web.xml</webXml>
                 </configuration>
             </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
-                <version>3.0.0</version>
                 <executions>
                     <execution>
                         <id>add-source</id>

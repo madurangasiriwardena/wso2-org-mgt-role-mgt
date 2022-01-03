@@ -2,8 +2,13 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.wso2</groupId>
+        <artifactId>wso2</artifactId>
+        <version>1.2</version>
+    </parent>
 
+    <modelVersion>4.0.0</modelVersion>
     <groupId>org.wso2.carbon.identity.organization</groupId>
     <artifactId>role-management</artifactId>
     <version>1.0-SNAPSHOT</version>
@@ -18,7 +23,7 @@
     <url>https://www.wso2.org</url>
 
     <properties>
-        <buildnumber.maven.plugin.version>1.4</buildnumber.maven.plugin.version>
+        <buildnumber.maven.plugin.version>3.2.0</buildnumber.maven.plugin.version>
         <openapi.tools.version>4.1.2</openapi.tools.version>
         <commons-lang.wso2.version>2.6.0.wso2v1</commons-lang.wso2.version>
         <commons.logging.version>1.2</commons.logging.version>
@@ -37,6 +42,8 @@
         <javax.ws.rs-api.version>2.1.1</javax.ws.rs-api.version>
         <json.wso2.version>3.0.0.wso2v1</json.wso2.version>
         <maven.bundle.plugin.version>3.2.0</maven.bundle.plugin.version>
+        <maven.compiler.plugin.version>2.3.1</maven.compiler.plugin.version>
+        <maven.war.plugin.version>3.2.2</maven.war.plugin.version>
         <maven.scr.plugin.version>1.2.10</maven.scr.plugin.version>
         <maven.surefire.plugin.version>2.22.1</maven.surefire.plugin.version>
         <powermock.version>1.7.4</powermock.version>
@@ -319,18 +326,6 @@
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>buildnumber-maven-plugin</artifactId>
                     <version>${buildnumber.maven.plugin.version}</version>
-                    <executions>
-                        <execution>
-                            <phase>validate</phase>
-                            <goals>
-                                <goal>create</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                    <configuration>
-                        <doCheck>false</doCheck>
-                        <doUpdate>false</doUpdate>
-                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.felix</groupId>
@@ -366,13 +361,19 @@
                     </configuration>
                 </plugin>
                 <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
+                    <version>${maven.compiler.plugin.version}</version>
+                    <inherited>true</inherited>
                     <configuration>
                         <encoding>UTF-8</encoding>
                         <source>1.8</source>
                         <target>1.8</target>
                     </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-war-plugin</artifactId>
+                    <version>${maven.war.plugin.version}</version>
                 </plugin>
             </plugins>
         </pluginManagement>

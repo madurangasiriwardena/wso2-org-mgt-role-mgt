@@ -75,8 +75,6 @@ import static org.wso2.carbon.identity.organization.role.mgt.core.util.Utils.han
 public class OrganizationUserRoleMgtDAOImpl implements OrganizationUserRoleMgtDAO {
     private static final Log LOG = LogFactory.getLog(OrganizationUserRoleMgtDAOImpl.class);
 
-    //TODO : https://medium.com/@jayanga/named-prepared-statements-in-c5-user-core-ac91c5828d37
-
     @Override
     public void addOrganizationUserRoleMappings(List<OrganizationUserRoleMapping> organizationUserRoleMappings,
                                                 int tenantID)
