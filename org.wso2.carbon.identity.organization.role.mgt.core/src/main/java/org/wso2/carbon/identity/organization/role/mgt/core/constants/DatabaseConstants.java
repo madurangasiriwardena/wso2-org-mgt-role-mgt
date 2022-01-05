@@ -30,7 +30,7 @@ public class DatabaseConstants {
         public static final String VIEW_ROLE_NAME_COLUMN = "UM_ROLE_NAME";
         public static final String VIEW_MANDATORY_COLUMN = "MANDATORY";
         public static final String VIEW_ASSIGNED_AT_COLUMN = "ASSIGNED_AT";
-        public static final String VIEW_ASSIGNED_AT_NAME_COLUMN = "NAME";
+        public static final String VIEW_ASSIGNED_AT_NAME_COLUMN = "UM_ORG_NAME";
         public static final String VIEW_ORG_ID_COLUMN = "ORG_ID";
         public static final String ORG_ID_ADDING = "ORG_ID = ?";
         public static final String ASSIGNED_AT_ADDING = "ASSIGNED_AT = :" +

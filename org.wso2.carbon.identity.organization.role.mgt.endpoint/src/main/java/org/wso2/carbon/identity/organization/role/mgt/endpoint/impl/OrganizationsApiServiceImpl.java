@@ -51,8 +51,10 @@ public class OrganizationsApiServiceImpl implements OrganizationsApiService {
     @Override
     public Response organizationsOrganizationIdRolesPost(String organizationId, UserRoleMappingDTO userRoleMappingDTO) {
         try {
-            UserRoleMapping newUserRoleMappings = new UserRoleMapping(organizationId, userRoleMappingDTO.getUsers().stream()
-                    .map(mapping -> new UserRoleMappingUser(mapping.getUserId(), mapping.getMandatory(), mapping.getIncludeSubOrgs())).collect(Collectors.toList()));
+            UserRoleMapping newUserRoleMappings = new UserRoleMapping(userRoleMappingDTO.getRoleId(), userRoleMappingDTO.getUsers()
+                    .stream()
+                    .map(mapping -> new UserRoleMappingUser(mapping.getUserId(), mapping.getMandatory(), mapping.getIncludeSubOrgs()))
+                    .collect(Collectors.toList()));
             getOrganizationUserRoleManager().addOrganizationUserRoleMappings(organizationId, newUserRoleMappings);
             return Response.created(getOrganizationRoleResourceURI(organizationId)).build();
         } catch (OrganizationUserRoleMgtClientException e) {

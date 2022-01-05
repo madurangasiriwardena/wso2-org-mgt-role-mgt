@@ -191,9 +191,8 @@ public class OrganizationUserRoleMgtDAOImpl implements OrganizationUserRoleMgtDA
                 // Decode the received response.
                 Map<String, Object> attributes;
                 ObjectMapper mapper = new ObjectMapper();
-                attributes =
-                        mapper.readValue(scimResponse.getResponseMessage(), new TypeReference<Map<String, Object>>() {
-                        });
+                attributes = mapper.readValue(scimResponse.getResponseMessage(), new TypeReference<Map<String, Object>>() {
+                });
                 if (attributes.containsKey("totalResults") && ((Integer) attributes.get("totalResults")) > 0 &&
                         attributes.containsKey("Resources") && ((ArrayList) attributes.get("Resources")).size() > 0) {
                     Map<String, Object> userAttributes =
@@ -381,7 +380,7 @@ public class OrganizationUserRoleMgtDAOImpl implements OrganizationUserRoleMgtDA
             String message =
                     String.format(String.valueOf(ERROR_CODE_ORGANIZATION_USER_ROLE_MAPPINGS_RETRIEVING_ERROR), roleId,
                             userId, organizationId);
-            throw new OrganizationUserRoleMgtServerException(message,ERROR_CODE_ORGANIZATION_USER_ROLE_MAPPINGS_RETRIEVING_ERROR.getCode(), e);
+            throw new OrganizationUserRoleMgtServerException(message, ERROR_CODE_ORGANIZATION_USER_ROLE_MAPPINGS_RETRIEVING_ERROR.getCode(), e);
         }
         return mappingsCount > 0;
     }
