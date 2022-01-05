@@ -214,7 +214,7 @@
                             <directory>src/main/webapp/</directory>
                         </resource>
                     </webResources>
-                    <warName>api#identity#organization-mgt#role-mgt#v1.0</warName>
+                    <warName>api#identity#organization-mgt#v1.0</warName>
                     <webXml>src/main/webapp/WEB-INF/web.xml</webXml>
                 </configuration>
             </plugin>

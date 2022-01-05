@@ -32,7 +32,6 @@ import org.wso2.carbon.identity.organization.role.mgt.core.exception.Organizatio
 import org.wso2.carbon.identity.organization.role.mgt.core.internal.OrganizationUserRoleMgtDataHolder;
 import org.wso2.carbon.identity.organization.role.mgt.core.models.*;
 import org.wso2.carbon.identity.organization.role.mgt.core.exception.OrganizationUserRoleMgtException;
-import org.wso2.carbon.identity.organization.role.mgt.core.util.Utils;
 import org.wso2.carbon.identity.scim2.common.DAO.GroupDAO;
 import org.wso2.carbon.identity.scim2.common.exceptions.IdentitySCIMException;
 import org.wso2.carbon.user.api.UserStoreException;
@@ -50,8 +49,12 @@ import static org.wso2.carbon.identity.organization.role.mgt.core.constants.Orga
 import static org.wso2.carbon.identity.organization.role.mgt.core.constants.OrganizationUserRoleMgtConstants.CASCADE_INSERT_USER_ORG_ROLES;
 import static org.wso2.carbon.identity.organization.role.mgt.core.constants.OrganizationUserRoleMgtConstants.ErrorMessages.*;
 import static org.wso2.carbon.identity.organization.role.mgt.core.constants.OrganizationUserRoleMgtConstants.PATCH_OP_REPLACE;
-import static org.wso2.carbon.identity.organization.role.mgt.core.util.Utils.*;
-import static org.wso2.carbon.registry.core.session.CurrentSession.getTenantId;
+import static org.wso2.carbon.identity.organization.role.mgt.core.util.Utils.getUserStoreManager;
+import static org.wso2.carbon.identity.organization.role.mgt.core.util.Utils.handleServerException;
+import static org.wso2.carbon.identity.organization.role.mgt.core.util.Utils.handleClientException;
+import static org.wso2.carbon.identity.organization.role.mgt.core.util.Utils.getUserIdFromUserName;
+import static org.wso2.carbon.identity.organization.role.mgt.core.util.Utils.getTenantDomain;
+import static org.wso2.carbon.identity.organization.role.mgt.core.util.Utils.getTenantId;
 
 public class OrganizationUserRoleManagerImpl implements OrganizationUserRoleManager {
     @Override
@@ -552,18 +555,13 @@ public class OrganizationUserRoleManagerImpl implements OrganizationUserRoleMana
         }
     }
 
-    private String getTenantDomain() {
 
-        return PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-    }
 
     private String getAuthenticatedUserId() throws OrganizationUserRoleMgtServerException {
-
-        return Utils.getUserIdFromUserName(getAuthenticatedUsername(), getTenantId());
+        return getUserIdFromUserName(getAuthenticatedUsername(), getTenantId());
     }
 
     private String getAuthenticatedUsername() {
-
         return PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
     }
 

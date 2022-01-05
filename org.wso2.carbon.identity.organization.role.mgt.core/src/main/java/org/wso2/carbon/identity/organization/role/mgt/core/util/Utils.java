@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.identity.organization.role.mgt.core.util;
 
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.organization.role.mgt.core.constants.OrganizationUserRoleMgtConstants;
 import org.wso2.carbon.identity.organization.role.mgt.core.exception.OrganizationUserRoleMgtServerException;
 import org.wso2.carbon.identity.organization.role.mgt.core.internal.OrganizationUserRoleMgtDataHolder;
@@ -44,7 +45,7 @@ public class Utils {
 
     /**
      *
-     * @return new instance of JdbcTemplate
+     * @return new instance of JdbcTemplate.
      */
     public static JdbcTemplate getNewJdbcTemplate() {
         return new JdbcTemplate(UmPersistenceManager.getInstance().getDataSource());
@@ -52,12 +53,16 @@ public class Utils {
 
     /**
      *
-     * @return new instance of NamedJdbcTemplate
+     * @return new instance of NamedJdbcTemplate.
      */
     public static NamedJdbcTemplate getNewNamedJdbcTemplate(){
         return new NamedJdbcTemplate(UmPersistenceManager.getInstance().getDataSource());
     }
 
+    /**
+     *
+     * @return new random unique universally unique identifier.
+     */
     public static String generateUniqueID() {
 
         return UUID.randomUUID().toString();
@@ -124,5 +129,11 @@ public class Utils {
         }
     }
 
+    public static String getTenantDomain() {
+        return PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+    }
 
+    public static int getTenantId(){
+        return PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+    }
 }
