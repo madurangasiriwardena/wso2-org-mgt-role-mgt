@@ -24,9 +24,6 @@ import org.wso2.carbon.identity.organization.role.mgt.core.exception.Organizatio
 import org.wso2.carbon.identity.organization.role.mgt.core.internal.OrganizationUserRoleMgtDataHolder;
 import org.wso2.carbon.identity.organization.role.mgt.core.exception.OrganizationUserRoleMgtClientException;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.database.utils.jdbc.JdbcTemplate;
 import org.wso2.carbon.database.utils.jdbc.NamedJdbcTemplate;
 import org.wso2.carbon.identity.core.persistence.UmPersistenceManager;
 import org.wso2.carbon.user.api.UserRealm;
@@ -41,16 +38,6 @@ import java.util.UUID;
  * Utility functions for role management.
  */
 public class Utils {
-    private static final Log log = LogFactory.getLog(Utils.class);
-
-    /**
-     *
-     * @return new instance of JdbcTemplate.
-     */
-    public static JdbcTemplate getNewJdbcTemplate() {
-        return new JdbcTemplate(UmPersistenceManager.getInstance().getDataSource());
-    }
-
     /**
      *
      * @return new instance of NamedJdbcTemplate.
@@ -108,8 +95,7 @@ public class Utils {
 
         RealmService realmService = OrganizationUserRoleMgtDataHolder.getInstance().getRealmService();
         UserRealm tenantUserRealm = realmService.getTenantUserRealm(tenantId);
-        UserStoreManager userStoreManager = (UserStoreManager) tenantUserRealm.getUserStoreManager();
-        return userStoreManager;
+        return (UserStoreManager) tenantUserRealm.getUserStoreManager();
     }
 
     public static String getUserIdFromUserName(String username, int tenantId)

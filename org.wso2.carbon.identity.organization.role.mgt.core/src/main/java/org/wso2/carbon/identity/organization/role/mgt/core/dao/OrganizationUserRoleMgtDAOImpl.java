@@ -82,7 +82,7 @@ public class OrganizationUserRoleMgtDAOImpl implements OrganizationUserRoleMgtDA
         NamedJdbcTemplate namedJdbcTemplate = Utils.getNewNamedJdbcTemplate();
         try {
             namedJdbcTemplate.withTransaction(template -> {
-                template.executeBatchInsert(queryForMultipleInserts(organizationUserRoleMappings.size()), namedPreparedStatement -> {
+                template.executeInsert(queryForMultipleInserts(organizationUserRoleMappings.size()), namedPreparedStatement -> {
                     for (OrganizationUserRoleMapping organizationUserRoleMapping : organizationUserRoleMappings) {
                         namedPreparedStatement.setString(DB_SCHEMA_COLUMN_NAME_ID, Utils.generateUniqueID());
                         namedPreparedStatement.setString(DB_SCHEMA_COLUMN_NAME_USER_ID, organizationUserRoleMapping.getUserId());
@@ -93,7 +93,7 @@ public class OrganizationUserRoleMgtDAOImpl implements OrganizationUserRoleMgtDA
                         namedPreparedStatement.setString(DB_SCHEMA_COLUMN_NAME_ASSIGNED_AT, organizationUserRoleMapping.getAssignedLevelOrganizationId());
                         namedPreparedStatement.setInt(DB_SCHEMA_COLUMN_NAME_MANDATORY, organizationUserRoleMapping.isMandatory() ? 1 : 0);
                     }
-                }, organizationUserRoleMappings);
+                }, organizationUserRoleMappings, false);
                 return null;
             });
         } catch (TransactionException e) {
@@ -101,6 +101,7 @@ public class OrganizationUserRoleMgtDAOImpl implements OrganizationUserRoleMgtDA
         }
     }
 
+    /*
     @Override
     public void addOrganizationUserRoleMappingsWithSp(List<UserRoleMappingUser> userList, String roleId,
                                                       int hybridRoleId, int tenantID, String assignedAt)
@@ -136,6 +137,7 @@ public class OrganizationUserRoleMgtDAOImpl implements OrganizationUserRoleMgtDA
         }
 
     }
+    */
 
     @Override
     public List<RoleMember> getUserIdsByOrganizationAndRole(String organizationId, String roleId, int offset, int limit,
@@ -536,12 +538,15 @@ public class OrganizationUserRoleMgtDAOImpl implements OrganizationUserRoleMgtDA
 
     private String queryForMultipleInserts(Integer numberOfMapings) {
         StringBuilder sb = new StringBuilder();
-        sb.append(INSERT_ALL);
+        //sb.append(INSERT_ALL);
 
         for (int i = 0; i < numberOfMapings; i++) {
             sb.append(INSERT_INTO_ORGANIZATION_USER_ROLE_MAPPING);
+            if(i!=numberOfMapings-1){
+                sb.append(";");
+            }
         }
-        sb.append(SELECT_DUMMY_RECORD);
+        //sb.append(SELECT_DUMMY_RECORD);
         return sb.toString();
     }
 

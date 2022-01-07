@@ -31,11 +31,6 @@ public class RoleMember {
         this.userAttributes = userAttributes;
     }
 
-    public void setUserAttributes(Map<String, Object> userAttributes) {
-
-        this.userAttributes = userAttributes;
-    }
-
     public Map<String, Object> getUserAttributes() {
 
         return userAttributes;

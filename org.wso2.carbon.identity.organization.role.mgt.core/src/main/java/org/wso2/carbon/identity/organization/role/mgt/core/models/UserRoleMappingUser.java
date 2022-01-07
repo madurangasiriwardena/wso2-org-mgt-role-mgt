@@ -32,7 +32,7 @@ public class UserRoleMappingUser {
     public UserRoleMappingUser(String userId, boolean mandatoryRole, boolean cascadedRole) {
         this.userId = userId;
         this.mandatoryRole = mandatoryRole;
-        this.cascadedRole = cascadedRole || mandatoryRole;
+        this.cascadedRole = cascadedRole;
     }
 
     public String getUserId() {

@@ -36,7 +36,7 @@ public interface OrganizationUserRoleMgtDAO {
             throws OrganizationUserRoleMgtException;
 
     /**
-     * Add organization-user-role mappings with SP.
+     * Add organization-user-role mappings with stored procedures.
      * @param userList
      * @param roleId
      * @param hybridRoleId
@@ -44,9 +44,10 @@ public interface OrganizationUserRoleMgtDAO {
      * @param assignedAt
      * @throws OrganizationUserRoleMgtException
      */
+    /*
     void addOrganizationUserRoleMappingsWithSp(List<UserRoleMappingUser> userList, String roleId,
                                                int hybridRoleId, int tenantID, String assignedAt)
-            throws OrganizationUserRoleMgtException;
+            throws OrganizationUserRoleMgtException;*/
 
     /**
      * Get user-ids by organization and role.
