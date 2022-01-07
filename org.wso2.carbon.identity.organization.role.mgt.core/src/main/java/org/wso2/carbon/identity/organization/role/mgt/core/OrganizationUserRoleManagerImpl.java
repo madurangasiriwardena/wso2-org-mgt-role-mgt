@@ -88,13 +88,13 @@ public class OrganizationUserRoleManagerImpl implements OrganizationUserRoleMana
                 for (UserRoleMappingUser user : userRoleMapping.getUsers()) {
                     boolean userExists = userStoreManager.isExistingUserWithID(user.getUserId());
                     if (!userExists) {
-                        throw handleServerException(ADD_ORG_ROLE_USER_REQUEST_INVALID_USER,
+                        throw handleClientException(ADD_ORG_ROLE_USER_REQUEST_INVALID_USER,
                                 "No user exists with user Id: " + user.getUserId());
                     }
                     if (user.isMandatoryRole()) {
                         //if it is mandatory then the cascaded property is implied.
                         if(!user.isCascadedRole()){
-                            throw handleServerException(ADD_ORG_ROLE_USER_REQUEST_INVALID_ORGANIZATION_PARAM,
+                            throw handleClientException(ADD_ORG_ROLE_USER_REQUEST_INVALID_ORGANIZATION_PARAM,
                                     "");
                         }
                         usersGetPermissionForSubOrgsMandatory.add(user);

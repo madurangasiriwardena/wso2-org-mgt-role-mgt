@@ -30,23 +30,23 @@ import java.util.List;
 public interface OrganizationUserRoleManager {
     /**
      * Create new {@link OrganizationUserRoleMapping}s in the database.
-     * @param organizationId
-     * @param userRoleMappings
-     * @throws OrganizationUserRoleMgtException
+     * @param organizationId ID of the organization
+     * @param userRoleMappings User-Role Mapping
+     * @throws OrganizationUserRoleMgtException Organization-User-Role Management exception.
      */
     void addOrganizationUserRoleMappings(String organizationId, UserRoleMapping userRoleMappings)
             throws OrganizationUserRoleMgtException;
 
     /**
      * Get users by organization and role
-     * @param organizationId
-     * @param roleId
-     * @param offset
-     * @param limit
-     * @param requestedAttributes
-     * @param filter
+     * @param organizationId ID of the organization.
+     * @param roleId ID of the role.
+     * @param offset Offset.
+     * @param limit Limit.
+     * @param requestedAttributes The list of requested attributes.
+     * @param filter Filter.
      * @return A list of Role Members.
-     * @throws OrganizationUserRoleMgtException
+     * @throws OrganizationUserRoleMgtException Organization-User-Role management exception.
      */
     List<RoleMember> getUsersByOrganizationAndRole(String organizationId, String roleId, int offset, int limit,
                                                    List<String> requestedAttributes, String filter)
@@ -54,11 +54,11 @@ public interface OrganizationUserRoleManager {
 
     /**
      * Patch organization-user-role mappings
-     * @param organizationId
-     * @param roleId
-     * @param userId
-     * @param userRoleOperations
-     * @throws OrganizationUserRoleMgtException
+     * @param organizationId ID of the organization.
+     * @param roleId ID of the role.
+     * @param userId ID of the user.
+     * @param userRoleOperations List of user role operations.
+     * @throws OrganizationUserRoleMgtException Organization-User-Role management exception.
      */
     void patchOrganizationsUserRoleMapping(String organizationId, String roleId,
                                            String userId, List<UserRoleOperation> userRoleOperations)

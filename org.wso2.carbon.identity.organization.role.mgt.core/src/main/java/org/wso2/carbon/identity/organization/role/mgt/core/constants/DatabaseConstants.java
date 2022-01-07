@@ -22,7 +22,6 @@ public class DatabaseConstants {
 
     public static final class H2Constants {
         public static final String COUNT_COLUMN_NAME = "COUNT(1)";
-//        public static final String INSERT_ALL = "INSERT ALL";
         public static final String VIEW_ID_COLUMN = "UM_ID";
         public static final String VIEW_PARENT_ID_COLUMN = "UM_PARENT_ID";
         public static final String VIEW_USER_ID_COLUMN = "UM_USER_ID";
@@ -39,17 +38,8 @@ public class DatabaseConstants {
         public static final String AND = " AND ";
         public static final String OR = " OR ";
         public static final String INSERT_INTO_ORGANIZATION_USER_ROLE_MAPPING = "INSERT INTO UM_USER_ROLE_ORG (UM_ID, UM_USER_ID, UM_ROLE_ID," +
-                "UM_HYBRID_ROLE_ID, UM_TENANT_ID, ORG_ID, ASSIGNED_AT, MANDATORY) VALUES (:" +
-                SQLPlaceholders.DB_SCHEMA_COLUMN_NAME_ID + ";,:" +
-                SQLPlaceholders.DB_SCHEMA_COLUMN_NAME_USER_ID + ";,:" +
-                SQLPlaceholders.DB_SCHEMA_COLUMN_NAME_ROLE_ID + ";,:" +
-                SQLPlaceholders.DB_SCHEMA_COLUMN_NAME_HYBRID_ROLE_ID + ";,:" +
-                SQLPlaceholders.DB_SCHEMA_COLUMN_NAME_TENANT_ID + ";,:" +
-                SQLPlaceholders.DB_SCHEMA_COLUMN_NAME_ORG_ID + ";,:" +
-                SQLPlaceholders.DB_SCHEMA_COLUMN_NAME_ASSIGNED_AT + ";,:" +
-                SQLPlaceholders.DB_SCHEMA_COLUMN_NAME_MANDATORY + ";)";
-        //public static final String INSERT_INTO_ORGANIZATION_USER_ROLE_MAPPING_USING_SP = "{call add_org_user_role_mapping(?,?,?,?,?,?)}";
-        //public static final String SELECT_DUMMY_RECORD = "SELECT 1 FROM DUAL";
+                "UM_HYBRID_ROLE_ID, UM_TENANT_ID, ORG_ID, ASSIGNED_AT, MANDATORY) VALUES " ;
+        public static final String INSERT_INTO_ORGANIZATION_USER_ROLE_MAPPING_VALUES = "(?,?,?,?,?,?,?,?)";
         public static final String GET_USERS_BY_ORG_AND_ROLE = "SELECT URO.UM_USER_ID, URO.MANDATORY,  URO.ASSIGNED_AT," +
                 "UO.UM_ORG_NAME FROM UM_USER_ROLE_ORG URO LEFT JOIN UM_ORG UO ON URO.ASSIGNED_AT = UO.UM_ID WHERE URO.ORG_ID = :" +
                 SQLPlaceholders.DB_SCHEMA_COLUMN_NAME_ORG_ID + "; AND URO.UM_ROLE_ID = :" +
@@ -62,7 +52,6 @@ public class DatabaseConstants {
         public static final String DELETE_ALL_ORGANIZATION_USER_ROLE_MAPPINGS_BY_USERID = "DELETE FROM UM_USER_ROLE_ORG WHERE UM_USER_ID = :" +
                 SQLPlaceholders.DB_SCHEMA_COLUMN_NAME_USER_ID + ";AND UM_TENANT_ID = :" +
                 SQLPlaceholders.DB_SCHEMA_COLUMN_NAME_TENANT_ID + ";";
-        //TODO: ORG_AUTHZ_VIEW TABLE CREATION AND TESTING
         public static final String GET_ROLES_BY_ORG_AND_USER = "SELECT DISTINCT UM_ROLE_ID, UM_ROLE_NAME FROM ORG_AUTHZ_VIEW WHERE ORG_ID = :" +
                 SQLPlaceholders.DB_SCHEMA_COLUMN_NAME_ORG_ID + ";AND UM_USER_ID = :" +
                 SQLPlaceholders.DB_SCHEMA_COLUMN_NAME_USER_ID + "; AND UM_TENANT_ID = :" +
@@ -103,7 +92,6 @@ public class DatabaseConstants {
                         SQLPlaceholders.DB_SCHEMA_COLUMN_NAME_PARENT_ID +
                         "; UNION ALL SELECT UO.UM_ID, UO.UM_PARENT_ID FROM UM_ORG UO JOIN childOrgs CO ON CO.UM_ID = UO.UM_PARENT_ID)" +
                         "SELECT UM_ID, UM_PARENT_ID FROM childOrgs ORDER BY UM_ID";
-
     }
 
     public static final class SQLPlaceholders {
@@ -118,6 +106,4 @@ public class DatabaseConstants {
         public static final String DB_SCHEMA_COLUMN_NAME_PARENT_ID = "PARENT_ID";
         public static final String DB_SCHEMA_COLUMN_NAME_ROLE_NAME = "ROLE_NAME";
     }
-
-
 }

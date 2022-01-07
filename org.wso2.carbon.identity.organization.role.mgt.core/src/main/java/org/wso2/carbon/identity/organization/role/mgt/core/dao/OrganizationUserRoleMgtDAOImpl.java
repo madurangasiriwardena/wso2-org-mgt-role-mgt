@@ -21,6 +21,7 @@ package org.wso2.carbon.identity.organization.role.mgt.core.dao;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.collections.MapUtils;
+import org.wso2.carbon.database.utils.jdbc.JdbcTemplate;
 import org.wso2.carbon.database.utils.jdbc.NamedJdbcTemplate;
 import org.wso2.carbon.identity.organization.role.mgt.core.constants.DatabaseConstants;
 import org.wso2.carbon.identity.organization.role.mgt.core.constants.OrganizationUserRoleMgtConstants;
@@ -32,11 +33,9 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.database.utils.jdbc.JdbcTemplate;
 
 import org.wso2.carbon.database.utils.jdbc.exceptions.DataAccessException;
 import org.wso2.carbon.database.utils.jdbc.exceptions.TransactionException;
-import org.wso2.carbon.identity.core.util.IdentityDatabaseUtil;
 import org.wso2.carbon.identity.scim2.common.impl.IdentitySCIMManager;
 import org.wso2.charon3.core.exceptions.CharonException;
 import org.wso2.charon3.core.extensions.UserManager;
@@ -44,9 +43,6 @@ import org.wso2.charon3.core.protocol.SCIMResponse;
 import org.wso2.charon3.core.protocol.endpoints.UserResourceManager;
 
 import java.io.IOException;
-import java.sql.CallableStatement;
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -79,19 +75,20 @@ public class OrganizationUserRoleMgtDAOImpl implements OrganizationUserRoleMgtDA
     public void addOrganizationUserRoleMappings(List<OrganizationUserRoleMapping> organizationUserRoleMappings,
                                                 int tenantID)
             throws OrganizationUserRoleMgtException {
-        NamedJdbcTemplate namedJdbcTemplate = Utils.getNewNamedJdbcTemplate();
+        JdbcTemplate jdbcTemplate = Utils.getNewJdbcTemplate();
         try {
-            namedJdbcTemplate.withTransaction(template -> {
-                template.executeInsert(queryForMultipleInserts(organizationUserRoleMappings.size()), namedPreparedStatement -> {
+            jdbcTemplate.withTransaction(template -> {
+                template.executeInsert(queryForMultipleInserts(organizationUserRoleMappings.size()), preparedStatement -> {
+                    int parameterIndex = 0;
                     for (OrganizationUserRoleMapping organizationUserRoleMapping : organizationUserRoleMappings) {
-                        namedPreparedStatement.setString(DB_SCHEMA_COLUMN_NAME_ID, Utils.generateUniqueID());
-                        namedPreparedStatement.setString(DB_SCHEMA_COLUMN_NAME_USER_ID, organizationUserRoleMapping.getUserId());
-                        namedPreparedStatement.setString(DB_SCHEMA_COLUMN_NAME_ROLE_ID, organizationUserRoleMapping.getRoleId());
-                        namedPreparedStatement.setInt(DB_SCHEMA_COLUMN_NAME_HYBRID_ROLE_ID, organizationUserRoleMapping.getHybridRoleId());
-                        namedPreparedStatement.setInt(DB_SCHEMA_COLUMN_NAME_TENANT_ID, tenantID);
-                        namedPreparedStatement.setString(DB_SCHEMA_COLUMN_NAME_ORG_ID, organizationUserRoleMapping.getOrganizationId());
-                        namedPreparedStatement.setString(DB_SCHEMA_COLUMN_NAME_ASSIGNED_AT, organizationUserRoleMapping.getAssignedLevelOrganizationId());
-                        namedPreparedStatement.setInt(DB_SCHEMA_COLUMN_NAME_MANDATORY, organizationUserRoleMapping.isMandatory() ? 1 : 0);
+                        preparedStatement.setString(++parameterIndex, Utils.generateUniqueID());
+                        preparedStatement.setString(++parameterIndex, organizationUserRoleMapping.getUserId());
+                        preparedStatement.setString(++parameterIndex, organizationUserRoleMapping.getRoleId());
+                        preparedStatement.setInt(++parameterIndex, organizationUserRoleMapping.getHybridRoleId());
+                        preparedStatement.setInt(++parameterIndex, tenantID);
+                        preparedStatement.setString(++parameterIndex, organizationUserRoleMapping.getOrganizationId());
+                        preparedStatement.setString(++parameterIndex, organizationUserRoleMapping.getAssignedLevelOrganizationId());
+                        preparedStatement.setInt(++parameterIndex, organizationUserRoleMapping.isMandatory() ? 1 : 0);
                     }
                 }, organizationUserRoleMappings, false);
                 return null;
@@ -100,44 +97,6 @@ public class OrganizationUserRoleMgtDAOImpl implements OrganizationUserRoleMgtDA
             throw handleServerException(ERROR_CODE_ORGANIZATION_USER_ROLE_MAPPINGS_ADD_ERROR, "", e);
         }
     }
-
-    /*
-    @Override
-    public void addOrganizationUserRoleMappingsWithSp(List<UserRoleMappingUser> userList, String roleId,
-                                                      int hybridRoleId, int tenantID, String assignedAt)
-            throws OrganizationUserRoleMgtException {
-        try (Connection connection = IdentityDatabaseUtil.getUserDBConnection()) {
-            connection.setAutoCommit(false);
-            try (CallableStatement callableStatement = connection.prepareCall(INSERT_INTO_ORGANIZATION_USER_ROLE_MAPPING_USING_SP)) {
-                for (UserRoleMappingUser user : userList) {
-                    callableStatement.setString(1, user.getUserId());
-                    callableStatement.setString(2, roleId);
-                    callableStatement.setInt(3, hybridRoleId);
-                    callableStatement.setInt(4, tenantID);
-                    callableStatement.setString(5, assignedAt);
-                    callableStatement.setInt(6, user.isMandatoryRole() ? 1 : 0);
-
-                    callableStatement.addBatch();
-                }
-                //execute batch
-                callableStatement.executeBatch();
-                connection.commit();
-            } catch (SQLException e) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Error occurred while executing the batch insert: ", e);
-                }
-                connection.rollback();
-                throw handleServerException(ERROR_CODE_ORGANIZATION_USER_ROLE_MAPPINGS_ADD_ERROR, "", e);
-            }
-        } catch (Exception e) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Error occurred while executing the batch insert: ", e);
-            }
-            throw handleServerException(ERROR_CODE_ORGANIZATION_USER_ROLE_MAPPINGS_ADD_ERROR, "", e);
-        }
-
-    }
-    */
 
     @Override
     public List<RoleMember> getUserIdsByOrganizationAndRole(String organizationId, String roleId, int offset, int limit,
@@ -364,10 +323,10 @@ public class OrganizationUserRoleMgtDAOImpl implements OrganizationUserRoleMgtDA
     public boolean isOrganizationUserRoleMappingExists(String organizationId, String userId, String roleId, String assignedLevel,
                                                        boolean mandatory, int tenantId) throws OrganizationUserRoleMgtException {
         NamedJdbcTemplate namedJdbcTemplate = Utils.getNewNamedJdbcTemplate();
-        int mappingsCount = 0;
+        int mappingsCount;
         try {
             mappingsCount = namedJdbcTemplate
-                    .fetchSingleRecord(buildIsRoleMappingExistsQuery(assignedLevel, mandatory),
+                    .fetchSingleRecord(buildIsRoleMappingExistsQuery(assignedLevel, true),
                             (resultSet, rowNumber) ->
                                     resultSet.getInt(COUNT_COLUMN_NAME),
                             namedPreparedStatement -> {
@@ -448,14 +407,12 @@ public class OrganizationUserRoleMgtDAOImpl implements OrganizationUserRoleMgtDA
     @Override
     public List<ChildParentAssociation> getAllSubOrganizations(String organizationId) throws OrganizationUserRoleMgtException {
         NamedJdbcTemplate namedJdbcTemplate = Utils.getNewNamedJdbcTemplate();
-
         try {
-            List<ChildParentAssociation> childParentAssociations = namedJdbcTemplate.executeQuery(FIND_ALL_CHILD_ORG_IDS,
+            return namedJdbcTemplate.executeQuery(FIND_ALL_CHILD_ORG_IDS,
                     (resultSet, rowNumber) ->
                             new ChildParentAssociation(resultSet.getString(VIEW_ID_COLUMN),
                                     resultSet.getString(VIEW_PARENT_ID_COLUMN)),
                     namedPreparedStatement -> namedPreparedStatement.setString(DB_SCHEMA_COLUMN_NAME_PARENT_ID, organizationId));
-            return childParentAssociations;
         } catch (DataAccessException e) {
             throw handleServerException(ERROR_CODE_ORGANIZATION_GET_CHILDREN_ERROR, "Organization Id " + organizationId,
                     e);
@@ -538,15 +495,15 @@ public class OrganizationUserRoleMgtDAOImpl implements OrganizationUserRoleMgtDA
 
     private String queryForMultipleInserts(Integer numberOfMapings) {
         StringBuilder sb = new StringBuilder();
-        //sb.append(INSERT_ALL);
+        sb.append(INSERT_INTO_ORGANIZATION_USER_ROLE_MAPPING);
 
         for (int i = 0; i < numberOfMapings; i++) {
-            sb.append(INSERT_INTO_ORGANIZATION_USER_ROLE_MAPPING);
+            sb.append(INSERT_INTO_ORGANIZATION_USER_ROLE_MAPPING_VALUES);
             if(i!=numberOfMapings-1){
-                sb.append(";");
+                sb.append(",");
             }
         }
-        //sb.append(SELECT_DUMMY_RECORD);
+
         return sb.toString();
     }
 

@@ -19,6 +19,7 @@
 package org.wso2.carbon.identity.organization.role.mgt.core.util;
 
 import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.database.utils.jdbc.JdbcTemplate;
 import org.wso2.carbon.identity.organization.role.mgt.core.constants.OrganizationUserRoleMgtConstants;
 import org.wso2.carbon.identity.organization.role.mgt.core.exception.OrganizationUserRoleMgtServerException;
 import org.wso2.carbon.identity.organization.role.mgt.core.internal.OrganizationUserRoleMgtDataHolder;
@@ -38,6 +39,14 @@ import java.util.UUID;
  * Utility functions for role management.
  */
 public class Utils {
+    /**
+     *
+     * @return new instance of JdbcTemplate.
+     */
+    public static JdbcTemplate getNewJdbcTemplate(){
+        return new JdbcTemplate(UmPersistenceManager.getInstance().getDataSource());
+    }
+
     /**
      *
      * @return new instance of NamedJdbcTemplate.

@@ -21,7 +21,6 @@ package org.wso2.carbon.identity.organization.role.mgt.core.handler;
 import org.apache.commons.logging.Log;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.identity.core.bean.context.MessageContext;
-import org.wso2.carbon.identity.event.IdentityEventException;
 import org.wso2.carbon.identity.event.event.Event;
 import org.wso2.carbon.identity.event.handler.AbstractEventHandler;
 import org.wso2.carbon.identity.organization.role.mgt.core.models.OrganizationUserRoleMappingForEvent;
@@ -43,13 +42,13 @@ public class OrganizationUserRoleHandler extends AbstractEventHandler {
     }
 
     @Override
-    public int getPriority(MessageContext messageContext){
+    public int getPriority(MessageContext messageContext) {
         return 51;
     }
 
 
     @Override
-    public void handleEvent(Event event) throws IdentityEventException {
+    public void handleEvent(Event event){
         //common data
         Map<String, Object> eventProperties = event.getEventProperties();
         String status = eventProperties.get(STATUS) instanceof Status ?
@@ -70,7 +69,7 @@ public class OrganizationUserRoleHandler extends AbstractEventHandler {
                         formatRoleMappingRevokeData(data), status));
                 break;
             default:
-                return;
+                break;
         }
     }
 
@@ -78,11 +77,9 @@ public class OrganizationUserRoleHandler extends AbstractEventHandler {
         OrganizationUserRoleMappingForEvent organizationUserRoleMappingForRevokeEvent =
                 data instanceof OrganizationUserRoleMappingForEvent ? (OrganizationUserRoleMappingForEvent) data :
                         new OrganizationUserRoleMappingForEvent();
-        StringBuilder builder = new StringBuilder();
-        builder.append("OrganizationId : " + organizationUserRoleMappingForRevokeEvent.getOrganizationId());
-        builder.append(", RoleId : " + organizationUserRoleMappingForRevokeEvent.getRoleId());
-        builder.append(", UserId : " + organizationUserRoleMappingForRevokeEvent.getUserId());
-        return builder.toString();
+        return "OrganizationId : " + organizationUserRoleMappingForRevokeEvent.getOrganizationId() +
+                ", RoleId : " + organizationUserRoleMappingForRevokeEvent.getRoleId() +
+                ", UserId : " + organizationUserRoleMappingForRevokeEvent.getUserId();
     }
 
     private String formatRoleMappingAssignmentData(Object data) {
@@ -90,16 +87,14 @@ public class OrganizationUserRoleHandler extends AbstractEventHandler {
         OrganizationUserRoleMappingForEvent organizationUserRoleMappingForRevokeEvent =
                 data instanceof OrganizationUserRoleMappingForEvent ? (OrganizationUserRoleMappingForEvent) data :
                         new OrganizationUserRoleMappingForEvent();
-        StringBuilder builder = new StringBuilder();
-        builder.append("OrganizationId : " + organizationUserRoleMappingForRevokeEvent.getOrganizationId());
-        builder.append(", RoleId : " + organizationUserRoleMappingForRevokeEvent.getRoleId());
+        String builder = "OrganizationId : " + organizationUserRoleMappingForRevokeEvent.getOrganizationId() +
+                ", RoleId : " + organizationUserRoleMappingForRevokeEvent.getRoleId();
         for (UserRoleMappingUser userRoleMappingUser : organizationUserRoleMappingForRevokeEvent
                 .getUsersRoleInheritance()) {
-            builder.append(", { UserId : " + userRoleMappingUser.getUserId());
-            builder.append(", isMandatoryRole : " + userRoleMappingUser.isMandatoryRole());
-            builder.append(", isCascadedRole: "+userRoleMappingUser.isCascadedRole());
-            builder.append(" }");
+            builder = builder.concat(", { UserId : " + userRoleMappingUser.getUserId() +
+                    ", isMandatoryRole : " + userRoleMappingUser.isMandatoryRole() +
+                    ", isCascadedRole: " + userRoleMappingUser.isCascadedRole() + " }");
         }
-        return builder.toString();
+        return builder;
     }
 }

@@ -28,38 +28,24 @@ import java.util.Map;
 public interface OrganizationUserRoleMgtDAO {
     /**
      * Add organization-user-role mappings.
-     * @param organizationUserRoleMappings
-     * @param tenantID
-     * @throws OrganizationUserRoleMgtException
+     * @param organizationUserRoleMappings List of Organization-User-Role mappings.
+     * @param tenantID The tenant ID.
+     * @throws OrganizationUserRoleMgtException Organization-User-Role management exception.
      */
     void addOrganizationUserRoleMappings(List<OrganizationUserRoleMapping> organizationUserRoleMappings, int tenantID)
             throws OrganizationUserRoleMgtException;
 
     /**
-     * Add organization-user-role mappings with stored procedures.
-     * @param userList
-     * @param roleId
-     * @param hybridRoleId
-     * @param tenantID
-     * @param assignedAt
-     * @throws OrganizationUserRoleMgtException
-     */
-    /*
-    void addOrganizationUserRoleMappingsWithSp(List<UserRoleMappingUser> userList, String roleId,
-                                               int hybridRoleId, int tenantID, String assignedAt)
-            throws OrganizationUserRoleMgtException;*/
-
-    /**
      * Get user-ids by organization and role.
-     * @param organizationId
-     * @param roleId
-     * @param offset
-     * @param limit
-     * @param requestedAttributes
-     * @param tenantID
-     * @param filter
-     * @return
-     * @throws OrganizationUserRoleMgtServerException
+     * @param organizationId ID of the organization.
+     * @param roleId ID of the role.
+     * @param offset The offset of the results.
+     * @param limit The limit of the results.
+     * @param requestedAttributes The list of attributes.
+     * @param tenantID The tenant ID.
+     * @param filter The filter.
+     * @return The List of RoleMembers.
+     * @throws OrganizationUserRoleMgtServerException Organization-User-Role Management exception.
      */
     List<RoleMember> getUserIdsByOrganizationAndRole(String organizationId, String roleId, int offset, int limit,
                                                      List<String> requestedAttributes, int tenantID, String filter)
@@ -67,11 +53,11 @@ public interface OrganizationUserRoleMgtDAO {
 
     /**
      * Delete organization-user-role mappings.
-     * @param deletionList
-     * @param userId
-     * @param roleId
-     * @param tenantId
-     * @throws OrganizationUserRoleMgtException
+     * @param deletionList List of organizations to be deleted for user role mappings.
+     * @param userId ID of the user.
+     * @param roleId ID of role.
+     * @param tenantId Tenant ID.
+     * @throws OrganizationUserRoleMgtException Organization-User-Role Management exception.
      */
     void deleteOrganizationsUserRoleMapping(Map<String,String> deletionList, String userId,
                                             String roleId, int tenantId)
@@ -79,33 +65,33 @@ public interface OrganizationUserRoleMgtDAO {
 
     /**
      * Delete all organization-user-role mappings of a user.
-     * @param userId
-     * @param tenantId
-     * @throws OrganizationUserRoleMgtException
+     * @param userId ID of the user.
+     * @param tenantId Tenant ID.
+     * @throws OrganizationUserRoleMgtException Organization-User-Role Management exception.
      */
     void deleteOrganizationsUserRoleMappings(String userId, int tenantId) throws OrganizationUserRoleMgtException;
 
     /**
      * Get roleids by organization and user ids.
-     * @param organizationId
-     * @param userId
-     * @param tenantId
-     * @return
-     * @throws OrganizationUserRoleMgtServerException
+     * @param organizationId ID of the organization.
+     * @param userId ID of the user.
+     * @param tenantId Tenant ID.
+     * @return List of Roles.
+     * @throws OrganizationUserRoleMgtServerException Organization-User-Role Management Server exception.
      */
     List<Role> getRolesByOrganizationAndUser(String organizationId, String userId, int tenantId)
             throws OrganizationUserRoleMgtServerException;
 
     /**
      * Updating the organization-user-role mappings on mandatory property.
-     * @param organizationId
-     * @param userId
-     * @param roleId
-     * @param organizationUserRoleMappingsToAdd
-     * @param organizationUserRoleMappingsToUpdate
-     * @param childOrganizationIdsToDeleteRecords
-     * @param tenantId
-     * @throws OrganizationUserRoleMgtServerException
+     * @param organizationId ID of the organization.
+     * @param userId ID of the user.
+     * @param roleId ID of the role.
+     * @param organizationUserRoleMappingsToAdd List of Organization-User-Role mappings to add.
+     * @param organizationUserRoleMappingsToUpdate List of Organization-User-Role mappings to update.
+     * @param childOrganizationIdsToDeleteRecords List of child organization IDs.
+     * @param tenantId Tenant ID.
+     * @throws OrganizationUserRoleMgtServerException Organization-User-Role Management Server exception.
      */
     void updateMandatoryProperty(String organizationId, String userId, String roleId,
                                  List<OrganizationUserRoleMapping> organizationUserRoleMappingsToAdd,
@@ -115,14 +101,14 @@ public interface OrganizationUserRoleMgtDAO {
 
     /**
      * Check whether there is an organization-user-role mapping.
-     * @param organizationId
-     * @param userId
-     * @param roleId
-     * @param assignedLevel
-     * @param mandatory
-     * @param tenantId
+     * @param organizationId ID of the organization.
+     * @param userId ID of the user.
+     * @param roleId ID of the role.
+     * @param assignedLevel The assigned level of the role.
+     * @param mandatory Mandatory or not.
+     * @param tenantId Tenant ID.
      * @return The boolean value of whether the user exists or not.
-     * @throws OrganizationUserRoleMgtException
+     * @throws OrganizationUserRoleMgtException Organization-User-Role Management exception.
      */
     boolean isOrganizationUserRoleMappingExists(String organizationId, String userId, String roleId,
                                                 String assignedLevel, boolean mandatory,
@@ -131,12 +117,12 @@ public interface OrganizationUserRoleMgtDAO {
 
     /**
      * Get the mandatory value of a directly assigned organization-user-role mapping.
-     * @param organizationId
-     * @param userId
-     * @param roleId
-     * @param tenantId
+     * @param organizationId ID of the organization.
+     * @param userId ID of the user.
+     * @param roleId ID of the role.
+     * @param tenantId Tenant ID.
      * @return The mandatory value of the organization-user-role mapping.
-     * @throws OrganizationUserRoleMgtException
+     * @throws OrganizationUserRoleMgtException Organization-User-Role Management exception.
      */
     int getDirectlyAssignedOrganizationUserRoleMappingInheritance(String organizationId, String userId, String roleId,
                                                                   int tenantId)
@@ -144,40 +130,40 @@ public interface OrganizationUserRoleMgtDAO {
 
     /**
      * Get role id by SCIM group name.
-     * @param roleName
-     * @param tenantId
+     * @param roleName Name of the role.
+     * @param tenantId Tenant ID.
      * @return The roleId
-     * @throws OrganizationUserRoleMgtServerException
+     * @throws OrganizationUserRoleMgtServerException Organization-User-Role Management exception.
      */
     Integer getRoleIdBySCIMGroupName(String roleName, int tenantId) throws OrganizationUserRoleMgtServerException;
 
     /**
      * Get all the sub organizations and their immediate parents.
-     * @param organizationId
+     * @param organizationId ID of the organization.
      * @return The child-parent association of all the sub-organizations.
-     * @throws OrganizationUserRoleMgtException
+     * @throws OrganizationUserRoleMgtException Organization-User-Role Management exception.
      */
     List<ChildParentAssociation> getAllSubOrganizations(String organizationId) throws OrganizationUserRoleMgtException;
 
     /**
      * Get mandatory value of any organization-user-role mapping.
-     * @param organizationId
-     * @param userId
-     * @param roleId
-     * @param tenantId
+     * @param organizationId ID of the organization.
+     * @param userId ID of the user.
+     * @param roleId ID of the role.
+     * @param tenantId Tenant ID.
      * @return The mandatory value of an organization-user-role-mapping.
-     * @throws OrganizationUserRoleMgtException
+     * @throws OrganizationUserRoleMgtException Organization-User-Role Management exception.
      */
     int getMandatoryOfAnyOrganizationUserRoleMapping(String organizationId, String userId, String roleId, int tenantId) throws OrganizationUserRoleMgtException;
 
     /**
      * Get assignedAt value of any organization-user-role mapping.
-     * @param organizationId
-     * @param userId
-     * @param roleId
-     * @param tenantId
+     * @param organizationId ID of the organization.
+     * @param userId ID of the user.
+     * @param roleId ID of the role.
+     * @param tenantId Tenant ID.
      * @return The assignedAt value of an organization-user-role mapping.
-     * @throws OrganizationUserRoleMgtException
+     * @throws OrganizationUserRoleMgtException Organization-User-Role Management exception.
      */
     String getAssignedAtOfAnyOrganizationUserRoleMapping(String organizationId, String userId, String roleId, int tenantId) throws OrganizationUserRoleMgtException;
 }

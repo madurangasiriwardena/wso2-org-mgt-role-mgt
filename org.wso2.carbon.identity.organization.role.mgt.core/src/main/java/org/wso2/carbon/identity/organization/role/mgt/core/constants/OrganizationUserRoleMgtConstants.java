@@ -56,7 +56,7 @@ public class OrganizationUserRoleMgtConstants {
                 "Patch operation boolean value error"),
         ADD_ORG_ROLE_USER_REQUEST_MAPPING_EXISTS("ORG-60214", "Mapping already exists", "%s"),
         INVALID_REQUEST("ORG-60215", "Invalid request", "Error while processing the request."),
-        ADD_ORG_ROLE_USER_REQUEST_INVALID_ORGANIZATION_PARAM("ORG-60215", "subOrganization value must be true.", "Error while processing the request."),
+        ADD_ORG_ROLE_USER_REQUEST_INVALID_ORGANIZATION_PARAM("ORG-60215", "subOrganization value must be true if mandatory value is true.", "Error while processing the request."),
 
         // Role Mgt Server Errors (ORG-65200 - ORG-65999)
         ERROR_CODE_ORGANIZATION_USER_ROLE_MAPPINGS_ADD_ERROR("ORG-65200",

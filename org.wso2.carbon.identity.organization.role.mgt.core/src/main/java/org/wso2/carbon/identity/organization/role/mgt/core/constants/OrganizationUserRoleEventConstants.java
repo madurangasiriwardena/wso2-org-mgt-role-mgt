@@ -35,19 +35,16 @@ public class OrganizationUserRoleEventConstants {
      * Status of the user's Organization Management action.
      */
     public enum Status {
-
         SUCCESS("Success"),
         FAILURE("Failure");
 
-        private String status;
+        private final String status;
 
         Status (String status) {
-
             this.status = status;
         }
 
         public String getStatus() {
-
             return status;
         }
     }

@@ -28,8 +28,6 @@ public class OrganizationUserRoleMappingForEvent {
     private String organizationId;
     private String roleId;
     private String userId;
-    //TODO: checking inheritance
-    //TODO: Give more proper name
     private List<UserRoleMappingUser> usersRoleInheritance;
 
     public OrganizationUserRoleMappingForEvent() {
