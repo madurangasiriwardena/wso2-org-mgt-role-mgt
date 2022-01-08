@@ -127,21 +127,21 @@ public class OrganizationUserRoleManagerImpl implements OrganizationUserRoleMana
                 /*
                  Assume we have organizations A,B,C,D and A is the immediate parent of B and B is the immediate parent of C and so on.
                  If we assign a non-mandatory role and if it is assigned at A saying include it to the sub organizations.
-                 Then we have to copy that role for all the sub organizations and the assigned level is A.
-                 Say we are assigning A, a role R1 to propagate then it will go to B and B's assigned level id will be id of A. And when it propagates
-                 to C the assigned level id of it will be the id of A.
+                 Then we have to copy that role for all the sub organizations and the assigned level is that organization level.
+                 Say we are assigning A, a role R1 to propagate then it will go to B and B's assigned level id will be id of B. And when it propagates
+                 to C the assigned level id of it will be the id of C.
                  A -> roleId - R1, assignedLevelId - id(A), orgId - id(A), Mandatory - 0
                   \
-                   B -> roleId - R1, assignedLevelId - id(A), orgId - id(B), Mandatory - 0
+                   B -> roleId - R1, assignedLevelId - id(B), orgId - id(B), Mandatory - 0
                     \
-                     C -> roleId - R1, assignedLevelId - id(A), orgId - id(C), Mandatory - 0
+                     C -> roleId - R1, assignedLevelId - id(C), orgId - id(C), Mandatory - 0
                       \
-                       D -> roleId - R1, assignedLevelId - id(A), orgId - id(D), Mandatory - 0
+                       D -> roleId - R1, assignedLevelId - id(D), orgId - id(D), Mandatory - 0
                  */
 
             for (ChildParentAssociation childParentAssociation : childParentAssociations) {
                 organizationUserRoleMappings.addAll(populateOrganizationUserRoleMappings(childParentAssociation.getOrganizationId(), roleId, hybridRoleId,
-                        organizationId, usersGetPermissionsForSubOrgsNonMandatory));
+                        childParentAssociation.getOrganizationId(), usersGetPermissionsForSubOrgsNonMandatory));
             }
         }
         if (CollectionUtils.isNotEmpty(usersGetPermissionForSubOrgsMandatory)) {

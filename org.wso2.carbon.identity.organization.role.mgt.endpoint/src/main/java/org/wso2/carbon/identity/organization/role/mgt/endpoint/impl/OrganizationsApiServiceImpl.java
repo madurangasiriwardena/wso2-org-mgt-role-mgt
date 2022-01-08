@@ -23,10 +23,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.identity.organization.role.mgt.core.constants.OrganizationUserRoleMgtConstants;
 import org.wso2.carbon.identity.organization.role.mgt.core.exception.OrganizationUserRoleMgtClientException;
 import org.wso2.carbon.identity.organization.role.mgt.core.exception.OrganizationUserRoleMgtException;
-import org.wso2.carbon.identity.organization.role.mgt.core.models.Role;
-import org.wso2.carbon.identity.organization.role.mgt.core.models.RoleMember;
-import org.wso2.carbon.identity.organization.role.mgt.core.models.UserRoleMapping;
-import org.wso2.carbon.identity.organization.role.mgt.core.models.UserRoleMappingUser;
+import org.wso2.carbon.identity.organization.role.mgt.core.models.*;
 import org.wso2.carbon.identity.organization.role.mgt.endpoint.*;
 import org.wso2.carbon.identity.organization.role.mgt.endpoint.dto.*;
 import org.wso2.carbon.identity.organization.role.mgt.endpoint.utils.RoleMgtEndpointUtils;
@@ -39,7 +36,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import javax.ws.rs.core.Response;
 
-import static org.wso2.carbon.identity.organization.role.mgt.core.constants.OrganizationUserRoleMgtConstants.ErrorMessages.PATCH_ORG_ROLE_USER_REQUEST_TOO_MANY_OPERATIONS;
 import static org.wso2.carbon.identity.organization.role.mgt.core.util.Utils.handleClientException;
 import static org.wso2.carbon.identity.organization.role.mgt.endpoint.constant.RoleMgtEndPointConstants.ORGANIZATION_ROLES_PATH;
 import static org.wso2.carbon.identity.organization.role.mgt.endpoint.utils.RoleMgtEndpointUtils.getOrganizationUserRoleManager;
@@ -110,14 +106,32 @@ public class OrganizationsApiServiceImpl implements OrganizationsApiService {
 
     @Override
     public Response organizationsOrganizationIdRolesRoleIdUsersUserIdPatch(String organizationId, String roleId, String userId, List<UserRoleOperationDTO> userRoleOperationDTO) {
-        return null;
+        try {
+            getOrganizationUserRoleManager().patchOrganizationsUserRoleMapping(organizationId, roleId, userId,
+                    userRoleOperationDTO.stream().map(op -> new UserRoleOperation(op.getOp(), op.getPath(), op.getValue()))
+                            .collect(Collectors.toList()));
+            return Response.noContent().build();
+        } catch (OrganizationUserRoleMgtClientException e) {
+            return RoleMgtEndpointUtils.handleBadRequestResponse(e, log);
+        } catch (OrganizationUserRoleMgtException e) {
+            return RoleMgtEndpointUtils.handleServerErrorResponse(e, log);
+        } catch (Throwable throwable) {
+            return RoleMgtEndpointUtils.handleUnexpectedServerError(throwable, log);
+        }
     }
 
     @Override
     public Response organizationsOrganizationIdUsersUserIdRolesGet(String organizationId, String userId) {
-
-        // do some magic!
-        return Response.ok().entity("magic!").build();
+        try {
+            List<Role> roles = getOrganizationUserRoleManager().getRolesByOrganizationAndUser(organizationId, userId);
+            return Response.ok().entity(roles).build();
+        } catch (OrganizationUserRoleMgtClientException e) {
+            return RoleMgtEndpointUtils.handleBadRequestResponse(e, log);
+        } catch (OrganizationUserRoleMgtException e) {
+            return RoleMgtEndpointUtils.handleServerErrorResponse(e, log);
+        } catch (Throwable throwable) {
+            return RoleMgtEndpointUtils.handleUnexpectedServerError(throwable, log);
+        }
     }
 
 

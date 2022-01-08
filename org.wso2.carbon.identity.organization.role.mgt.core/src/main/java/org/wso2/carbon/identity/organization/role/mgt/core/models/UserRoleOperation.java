@@ -31,10 +31,10 @@ public class UserRoleOperation {
         this.path = path;
     }
 
-    public UserRoleOperation(String path, boolean value, String op) {
+    public UserRoleOperation(String op, String path, boolean value) {
+        this.op = op;
         this.path = path;
         this.value = value;
-        this.op = op;
     }
 
     public String getPath() {

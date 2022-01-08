@@ -233,7 +233,7 @@ public class OrganizationUserRoleMgtDAOImpl implements OrganizationUserRoleMgtDA
         try {
             roles = namedJdbcTemplate.executeQuery(GET_ROLES_BY_ORG_AND_USER,
                     (resultSet, rowNumber) -> new Role(resultSet.getString(VIEW_ROLE_ID_COLUMN),
-                            "Internal/" + resultSet.getString(VIEW_ROLE_NAME_COLUMN)),
+                            "Internal/" + resultSet.getString(VIEW_ROLE_NAME_COLUMN)), //focusing on internal roles only.
                     namedPreparedStatement -> {
                         namedPreparedStatement.setString(DB_SCHEMA_COLUMN_NAME_ORG_ID, organizationId);
                         namedPreparedStatement.setString(DB_SCHEMA_COLUMN_NAME_USER_ID, userId);
@@ -357,7 +357,7 @@ public class OrganizationUserRoleMgtDAOImpl implements OrganizationUserRoleMgtDA
                             // We are not checking whether the role is mandatory or not. We want to get a user role mapping on
                             // params organizationId, userId, roleId, tenantId and assignedLevel
                             (resultSet, rowNumber) ->
-                                    resultSet.getInt(COUNT_COLUMN_NAME) == 1,
+                                    resultSet.getInt(COUNT_COLUMN_NAME) == 1, //TODO: If the count value is not equal to 1 we get errors.
                             namedPreparedStatement -> {
                                 namedPreparedStatement.setString(DB_SCHEMA_COLUMN_NAME_USER_ID, userId);
                                 namedPreparedStatement.setString(DB_SCHEMA_COLUMN_NAME_ROLE_ID, roleId);
