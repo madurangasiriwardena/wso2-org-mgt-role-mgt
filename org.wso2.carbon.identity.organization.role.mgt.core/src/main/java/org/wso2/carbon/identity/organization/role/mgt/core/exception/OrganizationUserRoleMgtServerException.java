@@ -22,9 +22,6 @@ package org.wso2.carbon.identity.organization.role.mgt.core.exception;
  * Organization User Role Management Server Exception.
  */
 public class OrganizationUserRoleMgtServerException extends OrganizationUserRoleMgtException{
-    public OrganizationUserRoleMgtServerException() {
-        super();
-    }
 
     public OrganizationUserRoleMgtServerException(String message, String errorCode) {
         super(message, errorCode);

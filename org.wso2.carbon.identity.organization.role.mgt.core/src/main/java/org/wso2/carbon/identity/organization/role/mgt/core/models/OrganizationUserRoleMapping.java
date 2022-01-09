@@ -131,7 +131,4 @@ public class OrganizationUserRoleMapping {
         return assignedLevelOrganizationName;
     }
 
-    public void setAssignedLevelOrganizationName(String assignedLevelOrganizationName) {
-        this.assignedLevelOrganizationName = assignedLevelOrganizationName;
-    }
 }

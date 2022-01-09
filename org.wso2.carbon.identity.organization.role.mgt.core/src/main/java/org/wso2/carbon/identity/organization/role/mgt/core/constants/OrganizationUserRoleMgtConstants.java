@@ -20,10 +20,6 @@ package org.wso2.carbon.identity.organization.role.mgt.core.constants;
 
 public class OrganizationUserRoleMgtConstants {
 
-    public static final String CASCADE_INSERT_USER_ORG_ROLES = "isCascadeInsert";
-
-    public static final String PATCH_OP_ADD = "add";
-    public static final String PATCH_OP_REMOVE = "remove";
     public static final String PATCH_OP_REPLACE = "replace";
     /**
      * Error messages.
@@ -57,12 +53,14 @@ public class OrganizationUserRoleMgtConstants {
         ADD_ORG_ROLE_USER_REQUEST_MAPPING_EXISTS("ORG-60214", "Mapping already exists", "%s"),
         INVALID_REQUEST("ORG-60215", "Invalid request", "Error while processing the request."),
         ADD_ORG_ROLE_USER_REQUEST_INVALID_ORGANIZATION_PARAM("ORG-60215", "subOrganization value must be true if mandatory value is true.", "Error while processing the request."),
+        DELETE_ORG_ROLE_USER_REQUEST_INVALID_BOOLEAN_VALUE("ORG-60216", "Invalid value",
+                "Delete operation boolean value error"),
 
         // Role Mgt Server Errors (ORG-65200 - ORG-65999)
         ERROR_CODE_ORGANIZATION_USER_ROLE_MAPPINGS_ADD_ERROR("ORG-65200",
                 "Error while creating the role mappings", ""),
         ERROR_CODE_ORGANIZATION_USER_ROLE_MAPPINGS_DELETE_ERROR("ORG-65201",
-                "Error while deleting the role : %s, for user : %s for organizations", ""),
+                "Error while deleting the organization user role mapping.", ""),
         ERROR_CODE_ORGANIZATION_USER_ROLE_MAPPINGS_RETRIEVING_ERROR("ORG-65202",
                 "Error while retrieving the role : %s, for user : %s for organization : %s", ""),
         ERROR_CODE_HYBRID_ROLE_ID_RETRIEVING_ERROR("ORG-65203",
@@ -76,7 +74,7 @@ public class OrganizationUserRoleMgtConstants {
         ERROR_CODE_ORGANIZATION_USER_ROLE_MAPPINGS_DELETE_PER_USER_ERROR("ORG-65208",
                 "Error while deleting organization user role mappings for user : %s", ""),
         ERROR_CODE_ORGANIZATION_USER_ROLE_MAPPINGS_UPDATE_ERROR("ORG-65209",
-                "Error while updating includeSubOrgs property of organization: %s , user: %s, role: %s mapping", ""),
+                "Error while updating mandatory property of organization mapping", ""),
         ERROR_CODE_UNEXPECTED("ORG-65210", "Unexpected Error", ""),
         ERROR_CODE_ORGANIZATION_GET_CHILDREN_ERROR("ORG-65211",
                 "Error while retrieving the child organizations : %s", "");

@@ -59,7 +59,7 @@ public interface OrganizationUserRoleMgtDAO {
      * @param tenantId Tenant ID.
      * @throws OrganizationUserRoleMgtException Organization-User-Role Management exception.
      */
-    void deleteOrganizationsUserRoleMapping(Map<String,String> deletionList, String userId,
+    void deleteOrganizationsUserRoleMapping(List<OrganizationUserRoleMapping> deletionList, String userId,
                                             String roleId, int tenantId)
             throws OrganizationUserRoleMgtException;
 
@@ -84,19 +84,13 @@ public interface OrganizationUserRoleMgtDAO {
 
     /**
      * Updating the organization-user-role mappings on mandatory property.
-     * @param organizationId ID of the organization.
-     * @param userId ID of the user.
-     * @param roleId ID of the role.
      * @param organizationUserRoleMappingsToAdd List of Organization-User-Role mappings to add.
-     * @param organizationUserRoleMappingsToUpdate List of Organization-User-Role mappings to update.
-     * @param childOrganizationIdsToDeleteRecords List of child organization IDs.
+     * @param organizationUserRoleMappingsToDelete List of Organization-User-Role mappings to delete.
      * @param tenantId Tenant ID.
      * @throws OrganizationUserRoleMgtServerException Organization-User-Role Management Server exception.
      */
-    void updateMandatoryProperty(String organizationId, String userId, String roleId,
-                                 List<OrganizationUserRoleMapping> organizationUserRoleMappingsToAdd,
-                                 List<OrganizationUserRoleMapping> organizationUserRoleMappingsToUpdate,
-                                 Map<String, String> childOrganizationIdsToDeleteRecords, int tenantId)
+    void updateMandatoryProperty(List<OrganizationUserRoleMapping> organizationUserRoleMappingsToAdd,
+                                 List<OrganizationUserRoleMapping> organizationUserRoleMappingsToDelete, int tenantId)
             throws OrganizationUserRoleMgtServerException;
 
     /**
@@ -144,17 +138,6 @@ public interface OrganizationUserRoleMgtDAO {
      * @throws OrganizationUserRoleMgtException Organization-User-Role Management exception.
      */
     List<ChildParentAssociation> getAllSubOrganizations(String organizationId) throws OrganizationUserRoleMgtException;
-
-    /**
-     * Get mandatory value of any organization-user-role mapping.
-     * @param organizationId ID of the organization.
-     * @param userId ID of the user.
-     * @param roleId ID of the role.
-     * @param tenantId Tenant ID.
-     * @return The mandatory value of an organization-user-role-mapping.
-     * @throws OrganizationUserRoleMgtException Organization-User-Role Management exception.
-     */
-    int getMandatoryOfAnyOrganizationUserRoleMapping(String organizationId, String userId, String roleId, int tenantId) throws OrganizationUserRoleMgtException;
 
     /**
      * Get assignedAt value of any organization-user-role mapping.

@@ -45,15 +45,13 @@ public class DatabaseConstants {
                 SQLPlaceholders.DB_SCHEMA_COLUMN_NAME_ORG_ID + "; AND URO.UM_ROLE_ID = :" +
                 SQLPlaceholders.DB_SCHEMA_COLUMN_NAME_ROLE_ID + "; AND URO.UM_TENANT_ID = :" +
                 SQLPlaceholders.DB_SCHEMA_COLUMN_NAME_TENANT_ID + ";";
-        public static final String DELETE_ORGANIZATION_USER_ROLE_MAPPINGS_ASSIGNED_AT_ORG_LEVEL = "DELETE FROM UM_USER_ROLE_ORG WHERE UM_USER_ID = :" +
-                SQLPlaceholders.DB_SCHEMA_COLUMN_NAME_USER_ID + "; AND UM_ROLE_ID = :" +
-                SQLPlaceholders.DB_SCHEMA_COLUMN_NAME_ROLE_ID + "; AND UM_TENANT_ID = :" +
-                SQLPlaceholders.DB_SCHEMA_COLUMN_NAME_TENANT_ID + ";";
+        public static final String DELETE_ORGANIZATION_USER_ROLE_MAPPINGS_ASSIGNED_AT_ORG_LEVEL = "DELETE FROM UM_USER_ROLE_ORG WHERE ";
+        public static final String DELETE_ORGANIZATION_USER_ROLE_MAPPING_VALUES = "ORG_ID= ? AND UM_USER_ID = ? AND UM_ROLE_ID = ? AND UM_TENANT_ID = ? AND ASSIGNED_AT = ? AND MANDATORY = ?";
         public static final String DELETE_ALL_ORGANIZATION_USER_ROLE_MAPPINGS_BY_USERID = "DELETE FROM UM_USER_ROLE_ORG WHERE UM_USER_ID = :" +
-                SQLPlaceholders.DB_SCHEMA_COLUMN_NAME_USER_ID + ";AND UM_TENANT_ID = :" +
+                SQLPlaceholders.DB_SCHEMA_COLUMN_NAME_USER_ID + "; AND UM_TENANT_ID = :" +
                 SQLPlaceholders.DB_SCHEMA_COLUMN_NAME_TENANT_ID + ";";
         public static final String GET_ROLES_BY_ORG_AND_USER = "SELECT DISTINCT UM_ROLE_ID, UM_ROLE_NAME FROM ORG_AUTHZ_VIEW WHERE ORG_ID = :" +
-                SQLPlaceholders.DB_SCHEMA_COLUMN_NAME_ORG_ID + ";AND UM_USER_ID = :" +
+                SQLPlaceholders.DB_SCHEMA_COLUMN_NAME_ORG_ID + "; AND UM_USER_ID = :" +
                 SQLPlaceholders.DB_SCHEMA_COLUMN_NAME_USER_ID + "; AND UM_TENANT_ID = :" +
                 SQLPlaceholders.DB_SCHEMA_COLUMN_NAME_TENANT_ID + ";";
         public static final String UPDATE_ORGANIZATION_USER_ROLE_MAPPING_MANDATORY_PROPERTY = "UPDATE UM_USER_ROLE_ORG SET MANDATORY = :" +
@@ -77,11 +75,6 @@ public class DatabaseConstants {
                 SQLPlaceholders.DB_SCHEMA_COLUMN_NAME_TENANT_ID + "; AND ORG_ID = :" +
                 SQLPlaceholders.DB_SCHEMA_COLUMN_NAME_ORG_ID + "; AND ASSIGNED_AT = :" +
                 SQLPlaceholders.DB_SCHEMA_COLUMN_NAME_ASSIGNED_AT + ";";
-        public static final String GET_MANDATORY_VALUE_OF_ORGANIZATION_USER_ROLE_MAPPING_LINK = "SELECT MANDATORY FROM UM_USER_ROLE_ORG WHERE UM_USER_ID = :" +
-                SQLPlaceholders.DB_SCHEMA_COLUMN_NAME_USER_ID + ";AND UM_ROLE_ID = :" +
-                SQLPlaceholders.DB_SCHEMA_COLUMN_NAME_ROLE_ID + "; AND UM_TENANT_ID = :" +
-                SQLPlaceholders.DB_SCHEMA_COLUMN_NAME_TENANT_ID + "; AND ORG_ID = :" +
-                SQLPlaceholders.DB_SCHEMA_COLUMN_NAME_ORG_ID + ";";
         public static final String GET_ASSIGNED_AT_VALUE_OF_ORGANIZATION_USER_ROLE_MAPPING_LINK = "SELECT ASSIGNED_AT FROM UM_USER_ROLE_ORG WHERE UM_USER_ID = :" +
                 SQLPlaceholders.DB_SCHEMA_COLUMN_NAME_USER_ID + "; AND UM_ROLE_ID = :" +
                 SQLPlaceholders.DB_SCHEMA_COLUMN_NAME_ROLE_ID + "; AND UM_TENANT_ID = :" +

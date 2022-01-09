@@ -31,10 +31,6 @@ public class ChildParentAssociation {
         this.parentOrgId = parentOrgId;
     }
 
-    public ChildParentAssociation(String organizationId){
-        this.organizationId = organizationId;
-    }
-
     public String getOrganizationId() {
         return organizationId;
     }
@@ -43,11 +39,4 @@ public class ChildParentAssociation {
         this.organizationId = organizationId;
     }
 
-    public String getParentOrgId() {
-        return parentOrgId;
-    }
-
-    public void setParentOrgId(String parentOrgId) {
-        this.parentOrgId = parentOrgId;
-    }
 }

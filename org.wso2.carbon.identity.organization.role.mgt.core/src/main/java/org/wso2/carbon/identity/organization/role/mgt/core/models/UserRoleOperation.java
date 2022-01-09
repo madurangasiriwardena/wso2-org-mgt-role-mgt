@@ -41,10 +41,6 @@ public class UserRoleOperation {
         return path;
     }
 
-    public void setPath(String path) {
-        this.path = path;
-    }
-
     public boolean getValue() {
         return value;
     }
@@ -57,7 +53,4 @@ public class UserRoleOperation {
         return op;
     }
 
-    public void setOp(String op) {
-        this.op = op;
-    }
 }
