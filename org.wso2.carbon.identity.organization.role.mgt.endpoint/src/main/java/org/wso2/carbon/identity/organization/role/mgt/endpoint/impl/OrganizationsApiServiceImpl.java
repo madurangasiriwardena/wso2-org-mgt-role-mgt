@@ -91,7 +91,6 @@ public class OrganizationsApiServiceImpl implements OrganizationsApiService {
     public Response organizationsOrganizationIdRolesRoleIdUsersUserIdDelete(String organizationId, String roleId, String userId, Boolean includeSubOrgs) {
 
         try {
-            //TODO inlcudeSubOrgsCheck
             getOrganizationUserRoleManager()
                     .deleteOrganizationsUserRoleMapping(organizationId, userId, roleId, includeSubOrgs);
             return Response.noContent().build();
