@@ -201,6 +201,9 @@ public class OrganizationUserRoleManagerImpl implements OrganizationUserRoleMana
         if (userRoleOperations.size() > 2) {
             throw handleClientException(PATCH_ORG_ROLE_USER_REQUEST_TOO_MANY_OPERATIONS, null);
         }
+        if (userRoleOperations.size() == 0) {
+            return;
+        }
         UserRoleOperation[] userRoleOperationsArr = {userRoleOperations.get(0), userRoleOperations.get(1)};
         validatePatchOperation(userRoleOperations);
         OrganizationUserRoleMgtDAO organizationUserRoleMgtDAO = new OrganizationUserRoleMgtDAOImpl();
@@ -304,25 +307,17 @@ public class OrganizationUserRoleManagerImpl implements OrganizationUserRoleMana
                 //organization-user-role mappings are unique to each organization. Therefore, we cannot possibly try to remove them here.
                 //If we need to remove them we need to delete them.
             }
-            organizationUserRoleMgtDAO.updateMandatoryProperty(addOrganizationUserRoleMappings, deleteOrganizationUserRoleMappings, getTenantId());
         }
+        organizationUserRoleMgtDAO.updateMandatoryProperty(addOrganizationUserRoleMappings, deleteOrganizationUserRoleMappings, getTenantId());
     }
 
     @Override
-    public void deleteOrganizationsUserRoleMapping(String organizationId, String userId, String roleId, String assignedLevel,
-                                                   boolean mandatory, boolean includeSubOrgs) throws OrganizationUserRoleMgtException {
+    public void deleteOrganizationsUserRoleMapping(String organizationId, String userId, String roleId, boolean includeSubOrgs) throws OrganizationUserRoleMgtException {
         //Fire Pre-Event
         fireEvent(PRE_REVOKE_ORGANIZATION_USER_ROLE, organizationId, null, Status.FAILURE);
 
         //DAO Object
         OrganizationUserRoleMgtDAO organizationUserRoleMgtDAO = new OrganizationUserRoleMgtDAOImpl();
-        boolean roleMappingExists = organizationUserRoleMgtDAO.isOrganizationUserRoleMappingExists(organizationId, userId,
-                roleId, organizationId, mandatory, getTenantId());
-        if (!roleMappingExists) {
-            throw handleClientException(DELETE_ORG_ROLE_USER_REQUEST_INVALID_MAPPING,
-                    String.format("No organization user role mapping found for organization: %s, user: %s, role: %s",
-                            organizationId, roleId, userId));
-        }
         /*
          Check whether the role mapping is directly assigned to the particular organization or inherited from the
          parent level.
@@ -370,9 +365,9 @@ public class OrganizationUserRoleManagerImpl implements OrganizationUserRoleMana
             if (includeSubOrgs) {
                 for (ChildParentAssociation childParentAssociation : subOrganizations) {
                     String orgId = childParentAssociation.getOrganizationId();
-                    checkMapping = organizationUserRoleMgtDAO.isOrganizationUserRoleMappingExists(orgId, userId, roleId, organizationId, false, getTenantId());
+                    checkMapping = organizationUserRoleMgtDAO.isOrganizationUserRoleMappingExists(orgId, userId, roleId, orgId, false, getTenantId());
                     if (checkMapping) {
-                        organizationListToBeDeleted.add(new OrganizationUserRoleMapping(orgId, userId, hybridRoleId, roleId, organizationId, false));
+                        organizationListToBeDeleted.add(new OrganizationUserRoleMapping(orgId, userId, hybridRoleId, roleId, orgId, false));
                     }
                 }
             }
@@ -385,7 +380,6 @@ public class OrganizationUserRoleManagerImpl implements OrganizationUserRoleMana
                 new OrganizationUserRoleMappingForEvent(organizationId, roleId, userId);
         fireEvent(POST_REVOKE_ORGANIZATION_USER_ROLE, organizationId, organizationUserRoleMappingForEvent,
                 OrganizationUserRoleEventConstants.Status.SUCCESS);
-
     }
 
     @Override

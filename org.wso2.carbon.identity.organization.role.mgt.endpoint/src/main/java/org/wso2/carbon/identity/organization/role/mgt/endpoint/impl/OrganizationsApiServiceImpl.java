@@ -88,12 +88,12 @@ public class OrganizationsApiServiceImpl implements OrganizationsApiService {
     }
 
     @Override
-    public Response organizationsOrganizationIdRolesRoleIdUsersUserIdDelete(String organizationId, String roleId, String userId, Boolean mandatory, Boolean includeSubOrgs, String assignedAt) {
+    public Response organizationsOrganizationIdRolesRoleIdUsersUserIdDelete(String organizationId, String roleId, String userId, Boolean includeSubOrgs) {
 
         try {
             //TODO inlcudeSubOrgsCheck
             getOrganizationUserRoleManager()
-                    .deleteOrganizationsUserRoleMapping(organizationId, userId, roleId, null, mandatory, includeSubOrgs);
+                    .deleteOrganizationsUserRoleMapping(organizationId, userId, roleId, includeSubOrgs);
             return Response.noContent().build();
         } catch (OrganizationUserRoleMgtClientException e) {
             return RoleMgtEndpointUtils.handleBadRequestResponse(e, log);

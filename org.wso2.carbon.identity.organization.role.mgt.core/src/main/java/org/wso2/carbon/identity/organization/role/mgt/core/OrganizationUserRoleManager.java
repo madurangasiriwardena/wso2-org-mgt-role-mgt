@@ -69,12 +69,10 @@ public interface OrganizationUserRoleManager {
      * @param organizationId
      * @param userId
      * @param roleId
-     * @param assignedLevel
-     * @param mandatory
      * @param includeSubOrgs
      * @throws OrganizationUserRoleMgtException
      */
-    void deleteOrganizationsUserRoleMapping(String organizationId, String userId, String roleId, String assignedLevel, boolean mandatory, boolean includeSubOrgs)
+    void deleteOrganizationsUserRoleMapping(String organizationId, String userId, String roleId,  boolean includeSubOrgs)
             throws OrganizationUserRoleMgtException;
 
     /**

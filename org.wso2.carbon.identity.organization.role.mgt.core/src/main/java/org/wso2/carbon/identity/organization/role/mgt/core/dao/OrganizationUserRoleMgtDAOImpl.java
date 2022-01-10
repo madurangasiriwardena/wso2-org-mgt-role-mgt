@@ -464,7 +464,7 @@ public class OrganizationUserRoleMgtDAOImpl implements OrganizationUserRoleMgtDA
     private String queryForMultipleRoleMappingDeletion(int numberOfOrganizations) {
         StringBuilder sb = new StringBuilder();
         sb.append(DELETE_ORGANIZATION_USER_ROLE_MAPPINGS_ASSIGNED_AT_ORG_LEVEL);
-        sb.append(AND).append("(");
+        sb.append("(");
         for (int i = 0; i < numberOfOrganizations; i++) {
             sb.append("(").append(DELETE_ORGANIZATION_USER_ROLE_MAPPING_VALUES).append(")");
             if (i != numberOfOrganizations - 1) {
