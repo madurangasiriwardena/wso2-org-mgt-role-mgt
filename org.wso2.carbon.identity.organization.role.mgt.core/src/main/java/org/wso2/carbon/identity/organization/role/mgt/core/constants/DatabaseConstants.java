@@ -54,13 +54,6 @@ public class DatabaseConstants {
                 SQLPlaceholders.DB_SCHEMA_COLUMN_NAME_ORG_ID + "; AND UM_USER_ID = :" +
                 SQLPlaceholders.DB_SCHEMA_COLUMN_NAME_USER_ID + "; AND UM_TENANT_ID = :" +
                 SQLPlaceholders.DB_SCHEMA_COLUMN_NAME_TENANT_ID + ";";
-        public static final String UPDATE_ORGANIZATION_USER_ROLE_MAPPING_MANDATORY_PROPERTY = "UPDATE UM_USER_ROLE_ORG SET MANDATORY = :" +
-                SQLPlaceholders.DB_SCHEMA_COLUMN_NAME_MANDATORY + "; WHERE UM_USER_ID = :" +
-                SQLPlaceholders.DB_SCHEMA_COLUMN_NAME_USER_ID + "; AND UM_ROLE_ID = :" +
-                SQLPlaceholders.DB_SCHEMA_COLUMN_NAME_ROLE_ID + "; AND ORG_ID = :" +
-                SQLPlaceholders.DB_SCHEMA_COLUMN_NAME_ORG_ID + "; AND ASSIGNED_AT = :" +
-                SQLPlaceholders.DB_SCHEMA_COLUMN_NAME_ASSIGNED_AT + "; AND UM_TENANT_ID = :" +
-                SQLPlaceholders.DB_SCHEMA_COLUMN_NAME_TENANT_ID + ";";
         public static final String GET_ROLE_ID_BY_SCIM_GROUP_NAME = "SELECT UM_ID FROM UM_HYBRID_ROLE WHERE UM_ROLE_NAME = :" +
                 SQLPlaceholders.DB_SCHEMA_COLUMN_NAME_ROLE_NAME + "; AND UM_TENANT_ID = :" +
                 SQLPlaceholders.DB_SCHEMA_COLUMN_NAME_TENANT_ID + ";";
