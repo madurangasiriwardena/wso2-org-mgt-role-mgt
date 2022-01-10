@@ -220,11 +220,11 @@ https://localhost:9443/t/carbon.super/api/identity/organization-mgt/v1.0/organiz
 
 - If there are non-mandatory organization-user-role mappings as following, they will make adjustments according to the `/isMandatory` and `/includeSubOrgs` values.
 
-|UM_ID|UM_USER_ID|UM_ROLE_ID|UM_HYBRID_ROLE_ID|UM_TENANT_ID|ORG_ID|ASSIGNED_AT|MANDATORY
-|-----|------|-----|----|-----|----|-----|-----
-|URO1|U1|R1|1|-1234|A|A|0
-|URO2|U1|R1|1|-1234|B|B|0
-|URO3|U1|R1|1|-1234|C|C|0
+    |UM_ID|UM_USER_ID|UM_ROLE_ID|UM_HYBRID_ROLE_ID|UM_TENANT_ID|ORG_ID|ASSIGNED_AT|MANDATORY
+    |-----|------|-----|----|-----|----|-----|-----
+    |URO1|U1|R1|1|-1234|A|A|0
+    |URO2|U1|R1|1|-1234|B|B|0
+    |URO3|U1|R1|1|-1234|C|C|0
 
 - If `/isMandatory` **false** and `/includeSubOrgs` **true** it will add new user-role mappings for the sub-organizations if they don't exist.
 - If `/isMandatory` **false** and `/includeSubOrgs` **false** nothing will happen.
