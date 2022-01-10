@@ -231,13 +231,13 @@ https://localhost:9443/t/carbon.super/api/identity/organization-mgt/v1.0/organiz
 - If `/isMandatory` **true** and `/includeSubOrgs` **false** it will give an error since **mandatory roles should be propagated to sub-organizations**.
 - If `/isMandatory` **true** and `/includeSubOrgs` **true** it will add new user-role mappings for sub-organizations and the given organization with mandatory property, while removing the non-mandatory roles in those with same `um_user_name`, `um_role_id` and `org_id`.
   
--If there are mandatory organization-user-role mappings as following, they will make adjustments according to the `/isMandatory` and `/includeSubOrgs` values.
+- If there are mandatory organization-user-role mappings as following, they will make adjustments according to the `/isMandatory` and `/includeSubOrgs` values.
 
-|UM_ID|UM_USER_ID|UM_ROLE_ID|UM_HYBRID_ROLE_ID|UM_TENANT_ID|ORG_ID|ASSIGNED_AT|MANDATORY
-|-----|------|-----|----|-----|----|-----|-----
-|URO1|U1|R1|1|-1234|A|A|1
-|URO2|U1|R1|1|-1234|B|A|1
-|URO3|U1|R1|1|-1234|C|A|1
+    |UM_ID|UM_USER_ID|UM_ROLE_ID|UM_HYBRID_ROLE_ID|UM_TENANT_ID|ORG_ID|ASSIGNED_AT|MANDATORY
+    |-----|------|-----|----|-----|----|-----|-----
+    |URO1|U1|R1|1|-1234|A|A|1
+    |URO2|U1|R1|1|-1234|B|A|1
+    |URO3|U1|R1|1|-1234|C|A|1
 
 - If `/isMandatory` **false** and `/includeSubOrgs` **true** it will remove all the mandatory and non-mandatory user-role mappings and add them anew.
 - If `/isMandatory` **false** and `/includeSubOrgs` **false** it will remove all the mandatory and non-mandatory role mappings and make one user-role mapping in the mentioned organization.
