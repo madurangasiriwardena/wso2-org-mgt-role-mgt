@@ -208,7 +208,7 @@ https://localhost:9443/t/carbon.super/api/identity/organization-mgt/v1.0/organiz
 - If there are two organization-user-role mappings like following, it will always take precedent one. Meaning it will always select the **mandatory** user role mapping and adjust it accordingly.
 
   |UM_ID|UM_USER_ID|UM_ROLE_ID|UM_HYBRID_ROLE_ID|UM_TENANT_ID|ORG_ID|ASSIGNED_AT|MANDATORY
-      |-----|------|-----|----|-----|----|-----|-----
+  |-----|------|-----|----|-----|----|-----|-----
   |URO1|U1|R1|1|-1234|A|A|1
   |URO2|U1|R1|1|-1234|A|A|0
 - If there are two user role mappings like this, and we pass `/isMandatory` **true** and `/includeSubOrgs` **false** it will throw an error, since **mandatory roles should be propagated**.
@@ -221,7 +221,7 @@ https://localhost:9443/t/carbon.super/api/identity/organization-mgt/v1.0/organiz
 - If there are non-mandatory organization-user-role mappings as following, they will make adjustments according to the `/isMandatory` and `/includeSubOrgs` values.
 
 |UM_ID|UM_USER_ID|UM_ROLE_ID|UM_HYBRID_ROLE_ID|UM_TENANT_ID|ORG_ID|ASSIGNED_AT|MANDATORY
-      |-----|------|-----|----|-----|----|-----|-----
+|-----|------|-----|----|-----|----|-----|-----
 |URO1|U1|R1|1|-1234|A|A|0
 |URO2|U1|R1|1|-1234|B|B|0
 |URO3|U1|R1|1|-1234|C|C|0
@@ -234,7 +234,7 @@ https://localhost:9443/t/carbon.super/api/identity/organization-mgt/v1.0/organiz
 -If there are mandatory organization-user-role mappings as following, they will make adjustments according to the `/isMandatory` and `/includeSubOrgs` values.
 
 |UM_ID|UM_USER_ID|UM_ROLE_ID|UM_HYBRID_ROLE_ID|UM_TENANT_ID|ORG_ID|ASSIGNED_AT|MANDATORY
-      |-----|------|-----|----|-----|----|-----|-----
+|-----|------|-----|----|-----|----|-----|-----
 |URO1|U1|R1|1|-1234|A|A|1
 |URO2|U1|R1|1|-1234|B|A|1
 |URO3|U1|R1|1|-1234|C|A|1
@@ -259,7 +259,7 @@ includeSubOrgs
 - As mentioned in `patch operation` for **role-management** this will always take the precedent one.
 - If there are two organization-user-role mappings as given below, it will select the one with mandatory 1.
   
-    |UM_ID|UM_USER_ID|UM_ROLE_ID|UM_HYBRID_ROLE_ID|UM_TENANT_ID|ORG_ID|ASSIGNED_AT|MANDATORY
+  |UM_ID|UM_USER_ID|UM_ROLE_ID|UM_HYBRID_ROLE_ID|UM_TENANT_ID|ORG_ID|ASSIGNED_AT|MANDATORY
   |-----|------|-----|----|-----|----|-----|-----
   |URO1|U1|R1|1|-1234|A|A|1
   |URO2|U1|R1|1|-1234|A|A|0
