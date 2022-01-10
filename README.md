@@ -39,41 +39,44 @@ For now, the implementation is done as an **OSGI** bundle and uses **H2** databa
       secure = "true"
       http_method = "ALL
       ```
-- Next start the IS and go to the H2 console using, `http://localhost:8082` and provide the JDBC URL, username and password given above.
-  `JDBC URL = jdbc:h2:{IS-HOME}/repository/database/WSO2SHARED_DB`
-  `username = wso2carbon`
-  `password = wso2carbon`
+      - Next start the IS and go to the H2 console using, `http://localhost:8082` and provide the JDBC URL, username and password given above.
+        `JDBC URL = jdbc:h2:{IS-HOME}/repository/database/WSO2SHARED_DB`
+        `username = wso2carbon`
+        `password = wso2carbon`
 
-    - Then use the following queries to add tables.
-      ```
-      CREATE TABLE IF NOT EXISTS UM_ORG (
-      UM_ID VARCHAR(255) NOT NULL,
-      UM_ORG_NAME VARCHAR(255) NOT NULL,
-      UM_ORG_DESCRIPTION VARCHAR(1024),
-      UM_CREATED_TIME TIMESTAMP NOT NULL,
-      UM_LAST_MODIFIED TIMESTAMP NOT NULL,
-      UM_STATUS VARCHAR(255) DEFAULT 'ACTIVE' NOT NULL, UM_TENANT_ID INTEGER DEFAULT 0,
-      UM_PARENT_ID VARCHAR(255), PRIMARY KEY (UM_ID), UNIQUE(UM_ORG_NAME, UM_TENANT_ID), FOREIGN KEY (UM_PARENT_ID) REFERENCES UM_ORG(UM_ID) ON DELETE CASCADE );
-       ```
-      |  UM_ID|UM_ORG_NAME|UM_ORG_DESCRIPTION|UM_CREATED_TIME|UM_LAST_MODIFIED|UM_STATUS|UM_TENANT_ID|UM_PARENT_ID
-      		 |---------|--------------------|------------------------------|-------------------------|-----------|--------------|--------------|-----
-       ```
-       CREATE TABLE UM_USER_ROLE_ORG (
-      UM_ID VARCHAR2(255) NOT NULL,
-      UM_USER_ID VARCHAR2(255) NOT NULL,
-      UM_ROLE_ID VARCHAR2(1024) NOT NULL,
-      UM_HYBRID_ROLE_ID INTEGER NOT NULL,
-      UM_TENANT_ID INTEGER DEFAULT 0,
-      ORG_ID VARCHAR2(255) NOT NULL,
-      ASSIGNED_AT VARCHAR2(255) NOT NULL,
-      MANDATORY INTEGER DEFAULT 0,
-      PRIMARY KEY (UM_ID),
-      CONSTRAINT FK_UM_USER_ROLE_ORG_UM_HYBRID_ROLE FOREIGN KEY (UM_HYBRID_ROLE_ID, UM_TENANT_ID) REFERENCES UM_HYBRID_ROLE(UM_ID, UM_TENANT_ID) ON DELETE CASCADE,
-      CONSTRAINT FK_UM_USER_ROLE_ORG_UM_ORG FOREIGN KEY (ORG_ID) REFERENCES UM_ORG(UM_ID) ON DELETE CASCADE,
-      CONSTRAINT FK_UM_USER_ROLE_ORG_ASSIGNED_AT FOREIGN KEY (ASSIGNED_AT) REFERENCES UM_ORG(UM_ID) ON DELETE CASCADE);
-       ```
-      | UM_ID|UM_USER_ID|UM_ROLE_ID|UM_HYBRID_ROLE_ID|UM_TENANT_ID|ORG_ID|ASSIGNED_AT|MANDATORY
-      		 |--------|---------|---------------|--------------------|---------------|-------------|---------|-----------|
+          - Then use the following queries to add tables.
+            ```
+            CREATE TABLE IF NOT EXISTS UM_ORG (
+            UM_ID VARCHAR(255) NOT NULL,
+            UM_ORG_NAME VARCHAR(255) NOT NULL,
+            UM_ORG_DESCRIPTION VARCHAR(1024),
+            UM_CREATED_TIME TIMESTAMP NOT NULL,
+            UM_LAST_MODIFIED TIMESTAMP NOT NULL,
+            UM_STATUS VARCHAR(255) DEFAULT 'ACTIVE' NOT NULL, UM_TENANT_ID INTEGER DEFAULT 0,
+            UM_PARENT_ID VARCHAR(255), PRIMARY KEY (UM_ID), UNIQUE(UM_ORG_NAME, UM_TENANT_ID), FOREIGN KEY (UM_PARENT_ID) REFERENCES UM_ORG(UM_ID) ON DELETE CASCADE );
+             ```
+          
+            |  UM_ID|UM_ORG_NAME|UM_ORG_DESCRIPTION|UM_CREATED_TIME|UM_LAST_MODIFIED|UM_STATUS|UM_TENANT_ID|UM_PARENT_ID
+            |---------|--------------------|------------------------------|-------------------------|-----------|--------------|--------------|-----
+          
+            ```
+             CREATE TABLE UM_USER_ROLE_ORG (
+            UM_ID VARCHAR2(255) NOT NULL,
+            UM_USER_ID VARCHAR2(255) NOT NULL,
+            UM_ROLE_ID VARCHAR2(1024) NOT NULL,
+            UM_HYBRID_ROLE_ID INTEGER NOT NULL,
+            UM_TENANT_ID INTEGER DEFAULT 0,
+            ORG_ID VARCHAR2(255) NOT NULL,
+            ASSIGNED_AT VARCHAR2(255) NOT NULL,
+            MANDATORY INTEGER DEFAULT 0,
+            PRIMARY KEY (UM_ID),
+            CONSTRAINT FK_UM_USER_ROLE_ORG_UM_HYBRID_ROLE FOREIGN KEY (UM_HYBRID_ROLE_ID, UM_TENANT_ID) REFERENCES UM_HYBRID_ROLE(UM_ID, UM_TENANT_ID) ON DELETE CASCADE,
+            CONSTRAINT FK_UM_USER_ROLE_ORG_UM_ORG FOREIGN KEY (ORG_ID) REFERENCES UM_ORG(UM_ID) ON DELETE CASCADE,
+            CONSTRAINT FK_UM_USER_ROLE_ORG_ASSIGNED_AT FOREIGN KEY (ASSIGNED_AT) REFERENCES UM_ORG(UM_ID) ON DELETE CASCADE);
+             ```
+            
+            | UM_ID|UM_USER_ID|UM_ROLE_ID|UM_HYBRID_ROLE_ID|UM_TENANT_ID|ORG_ID|ASSIGNED_AT|MANDATORY
+            |--------|---------|---------------|--------------------|---------------|-------------|---------|-----------|
 
 ## Build
 
