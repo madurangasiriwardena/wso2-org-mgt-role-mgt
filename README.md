@@ -305,10 +305,19 @@ includeSubOrgs
   
 - If there are only non-mandatory user-role mappings, then if `includeSubOrgs=true` it will remove all the non-mandatory user-role mappings in sub-organizations and the mentioned organization, else if `includeSubOrgs=false` it will only remove the user-role mapping in that mentioned organization.
 
-### Get users from a certain organization having certain roles.
+### Get users from a certain organization having certain roles
 **API**
 ```
 https://localhost:9443/t/carbon.super/api/identity/organization-mgt/v1.0/organizations/{organization-id}/roles/{role-id}/
+```
+
+**Notes**
+- This gives the user list of an organization with specific role.
+
+### Get roles from a certain user in a organization
+**API**
+```
+https://localhost:9443/t/carbon.super/api/identity/organization-mgt/v1.0/organizations/{organization-id}/users/{user-id}/
 ```
 
 **Notes**
