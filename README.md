@@ -39,80 +39,80 @@ For now, the implementation is done as an **OSGI** bundle and uses **H2** databa
       secure = "true"
       http_method = "ALL
       ```
-      - Next start the IS and go to the H2 console using, `http://localhost:8082` and provide the JDBC URL, username and password given above.
-        `JDBC URL = jdbc:h2:{IS-HOME}/repository/database/WSO2SHARED_DB`
-        `username = wso2carbon`
-        `password = wso2carbon`
+    - Next start the IS and go to the H2 console using, `http://localhost:8082` and provide the JDBC URL, username and password given above.
+      `JDBC URL = jdbc:h2:{IS-HOME}/repository/database/WSO2SHARED_DB`
+      `username = wso2carbon`
+      `password = wso2carbon`
 
-          - Then use the following queries to add tables.
-            ```
-            CREATE TABLE IF NOT EXISTS UM_ORG (
-            UM_ID VARCHAR(255) NOT NULL,
-            UM_ORG_NAME VARCHAR(255) NOT NULL,
-            UM_ORG_DESCRIPTION VARCHAR(1024),
-            UM_CREATED_TIME TIMESTAMP NOT NULL,
-            UM_LAST_MODIFIED TIMESTAMP NOT NULL,
-            UM_STATUS VARCHAR(255) DEFAULT 'ACTIVE' NOT NULL, UM_TENANT_ID INTEGER DEFAULT 0,
-            UM_PARENT_ID VARCHAR(255), PRIMARY KEY (UM_ID), UNIQUE(UM_ORG_NAME, UM_TENANT_ID), FOREIGN KEY (UM_PARENT_ID) REFERENCES UM_ORG(UM_ID) ON DELETE CASCADE );
-             ```
+    - Then use the following queries to add tables.
+      ```
+      CREATE TABLE IF NOT EXISTS UM_ORG (
+      UM_ID VARCHAR(255) NOT NULL,
+      UM_ORG_NAME VARCHAR(255) NOT NULL,
+      UM_ORG_DESCRIPTION VARCHAR(1024),
+      UM_CREATED_TIME TIMESTAMP NOT NULL,
+      UM_LAST_MODIFIED TIMESTAMP NOT NULL,
+      UM_STATUS VARCHAR(255) DEFAULT 'ACTIVE' NOT NULL, UM_TENANT_ID INTEGER DEFAULT 0,
+      UM_PARENT_ID VARCHAR(255), PRIMARY KEY (UM_ID), UNIQUE(UM_ORG_NAME, UM_TENANT_ID), FOREIGN KEY (UM_PARENT_ID) REFERENCES UM_ORG(UM_ID) ON DELETE CASCADE );
+       ```
           
-            |  UM_ID|UM_ORG_NAME|UM_ORG_DESCRIPTION|UM_CREATED_TIME|UM_LAST_MODIFIED|UM_STATUS|UM_TENANT_ID|UM_PARENT_ID
-            |---------|--------------------|------------------------------|-------------------------|-----------|--------------|--------------|-----
+      |  UM_ID|UM_ORG_NAME|UM_ORG_DESCRIPTION|UM_CREATED_TIME|UM_LAST_MODIFIED|UM_STATUS|UM_TENANT_ID|UM_PARENT_ID
+      |---------|--------------------|------------------------------|-------------------------|-----------|--------------|--------------|-----
           
-            ```
-            CREATE TABLE UM_USER_ROLE_ORG (
-            UM_ID VARCHAR2(255) NOT NULL,
-            UM_USER_ID VARCHAR2(255) NOT NULL,
-            UM_ROLE_ID VARCHAR2(1024) NOT NULL,
-            UM_HYBRID_ROLE_ID INTEGER NOT NULL,
-            UM_TENANT_ID INTEGER DEFAULT 0,
-            ORG_ID VARCHAR2(255) NOT NULL,
-            ASSIGNED_AT VARCHAR2(255) NOT NULL,
-            MANDATORY INTEGER DEFAULT 0,
-            PRIMARY KEY (UM_ID),
-            CONSTRAINT FK_UM_USER_ROLE_ORG_UM_HYBRID_ROLE FOREIGN KEY (UM_HYBRID_ROLE_ID, UM_TENANT_ID) REFERENCES UM_HYBRID_ROLE(UM_ID, UM_TENANT_ID) ON DELETE CASCADE,
-            CONSTRAINT FK_UM_USER_ROLE_ORG_UM_ORG FOREIGN KEY (ORG_ID) REFERENCES UM_ORG(UM_ID) ON DELETE CASCADE,
-            CONSTRAINT FK_UM_USER_ROLE_ORG_ASSIGNED_AT FOREIGN KEY (ASSIGNED_AT) REFERENCES UM_ORG(UM_ID) ON DELETE CASCADE);
-             ```
+      ```
+      CREATE TABLE UM_USER_ROLE_ORG (
+      UM_ID VARCHAR2(255) NOT NULL,
+      UM_USER_ID VARCHAR2(255) NOT NULL,
+      UM_ROLE_ID VARCHAR2(1024) NOT NULL,
+      UM_HYBRID_ROLE_ID INTEGER NOT NULL,
+      UM_TENANT_ID INTEGER DEFAULT 0,
+      ORG_ID VARCHAR2(255) NOT NULL,
+      ASSIGNED_AT VARCHAR2(255) NOT NULL,
+      MANDATORY INTEGER DEFAULT 0,
+      PRIMARY KEY (UM_ID),
+      CONSTRAINT FK_UM_USER_ROLE_ORG_UM_HYBRID_ROLE FOREIGN KEY (UM_HYBRID_ROLE_ID, UM_TENANT_ID) REFERENCES UM_HYBRID_ROLE(UM_ID, UM_TENANT_ID) ON DELETE CASCADE,
+      CONSTRAINT FK_UM_USER_ROLE_ORG_UM_ORG FOREIGN KEY (ORG_ID) REFERENCES UM_ORG(UM_ID) ON DELETE CASCADE,
+      CONSTRAINT FK_UM_USER_ROLE_ORG_ASSIGNED_AT FOREIGN KEY (ASSIGNED_AT) REFERENCES UM_ORG(UM_ID) ON DELETE CASCADE);
+       ```
             
-            | UM_ID|UM_USER_ID|UM_ROLE_ID|UM_HYBRID_ROLE_ID|UM_TENANT_ID|ORG_ID|ASSIGNED_AT|MANDATORY
-            |--------|---------|---------------|--------------------|---------------|-------------|---------|-----------|
-          - Add the following `VIEW` to database.
-            ```
-            CREATE VIEW ORG_AUTHZ_VIEW AS
-            SELECT
-            URP.UM_PERMISSION_ID,
-            URO.UM_ROLE_ID,
-            URO.UM_HYBRID_ROLE_ID,
-            URP.UM_ROLE_NAME,
-            URP.UM_IS_ALLOWED,
-            URP.UM_TENANT_ID,
-            URP.UM_DOMAIN_ID,
-            UP.UM_RESOURCE_ID,
-            UP.UM_ACTION,
-            UHR.UM_ID,
-            URO.UM_USER_ID,
-            URO.ORG_ID,
-            UO.UM_ORG_NAME
-            FROM
-            UM_USER_ROLE_ORG URO
-            LEFT JOIN
-            UM_HYBRID_ROLE UHR
-            ON
-            (UHR.UM_ID = URO.UM_HYBRID_ROLE_ID)
-            LEFT JOIN
-            UM_ROLE_PERMISSION URP
-            ON
-            (UHR.UM_ROLE_NAME = URP.UM_ROLE_NAME)
-            LEFT JOIN
-            UM_PERMISSION UP
-            ON
-            URP.UM_PERMISSION_ID = UP.UM_ID
-            LEFT JOIN
-            UM_ORG UO
-            ON
-            URO.ORG_ID = UO.UM_ID
-            ```
+      | UM_ID|UM_USER_ID|UM_ROLE_ID|UM_HYBRID_ROLE_ID|UM_TENANT_ID|ORG_ID|ASSIGNED_AT|MANDATORY
+      |--------|---------|---------------|--------------------|---------------|-------------|---------|-----------|
+    - Add the following `VIEW` to database.
+      ```
+      CREATE VIEW ORG_AUTHZ_VIEW AS
+      SELECT
+      URP.UM_PERMISSION_ID,
+      URO.UM_ROLE_ID,
+      URO.UM_HYBRID_ROLE_ID,
+      URP.UM_ROLE_NAME,
+      URP.UM_IS_ALLOWED,
+      URP.UM_TENANT_ID,
+      URP.UM_DOMAIN_ID,
+      UP.UM_RESOURCE_ID,
+      UP.UM_ACTION,
+      UHR.UM_ID,
+      URO.UM_USER_ID,
+      URO.ORG_ID,
+      UO.UM_ORG_NAME
+      FROM
+      UM_USER_ROLE_ORG URO
+      LEFT JOIN
+      UM_HYBRID_ROLE UHR
+      ON
+      (UHR.UM_ID = URO.UM_HYBRID_ROLE_ID)
+      LEFT JOIN
+      UM_ROLE_PERMISSION URP
+      ON
+      (UHR.UM_ROLE_NAME = URP.UM_ROLE_NAME)
+      LEFT JOIN
+      UM_PERMISSION UP
+      ON
+      URP.UM_PERMISSION_ID = UP.UM_ID
+      LEFT JOIN
+      UM_ORG UO
+      ON
+      URO.ORG_ID = UO.UM_ID
+      ```
 
 ## Build
 
@@ -149,7 +149,7 @@ Organization B is the immediate parent of C and Organization C is the immediate 
 ### Add organization-user-role mappings
 **API**  
 ```
-https://localhost:9443/t/carbon.super/api/identity/organization-mgt/v1.0/organizations/{organization-id}/roles
+https://localhost:9443/{tenant-domain}/{tenant}/api/identity/organization-mgt/v1.0/organizations/{organization-id}/roles
 ```
 
 **Sample Request Body**  
@@ -220,7 +220,7 @@ https://localhost:9443/t/carbon.super/api/identity/organization-mgt/v1.0/organiz
 ### Patch organization-user-role mappings
 **API**
 ```
-https://localhost:9443/t/carbon.super/api/identity/organization-mgt/v1.0/organizations/{organization-id}/roles/{role-id}/users/{user-id}
+https://localhost:9443/{tenant-domain}/{tenant}/api/identity/organization-mgt/v1.0/organizations/{organization-id}/roles/{role-id}/users/{user-id}
 ```
 
 **Sample Request Body**
@@ -283,7 +283,7 @@ https://localhost:9443/t/carbon.super/api/identity/organization-mgt/v1.0/organiz
 ### Delete organization-user-role mappings
 **API**
 ```
-https://localhost:9443/t/carbon.super/api/identity/organization-mgt/v1.0/organizations/{organization-id}/roles/{role-id}/users/{user-id}
+https://localhost:9443/{tenant-domain}/{tenant}/api/identity/organization-mgt/v1.0/organizations/{organization-id}/roles/{role-id}/users/{user-id}
 ```
 
 **Request Parameters**
@@ -308,7 +308,7 @@ includeSubOrgs
 ### Get users from a certain organization having certain roles
 **API**
 ```
-https://localhost:9443/t/carbon.super/api/identity/organization-mgt/v1.0/organizations/{organization-id}/roles/{role-id}/
+https://localhost:9443/{tenant-domain}/{tenant}/api/identity/organization-mgt/v1.0/organizations/{organization-id}/roles/{role-id}/
 ```
 
 **Notes**
@@ -317,7 +317,7 @@ https://localhost:9443/t/carbon.super/api/identity/organization-mgt/v1.0/organiz
 ### Get roles from a certain user in a organization
 **API**
 ```
-https://localhost:9443/t/carbon.super/api/identity/organization-mgt/v1.0/organizations/{organization-id}/users/{user-id}/
+https://localhost:9443/{tenant-domain}/{tenant}/api/identity/organization-mgt/v1.0/organizations/{organization-id}/users/{user-id}/
 ```
 
 **Notes**
