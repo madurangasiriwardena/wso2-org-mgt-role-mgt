@@ -20,11 +20,9 @@ package org.wso2.carbon.identity.organization.role.mgt.core.dao;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.commons.collections.MapUtils;
 import org.wso2.carbon.database.utils.jdbc.JdbcTemplate;
 import org.wso2.carbon.database.utils.jdbc.NamedJdbcTemplate;
 import org.wso2.carbon.identity.organization.role.mgt.core.constants.DatabaseConstants;
-import org.wso2.carbon.identity.organization.role.mgt.core.constants.OrganizationUserRoleMgtConstants;
 import org.wso2.carbon.identity.organization.role.mgt.core.exception.OrganizationUserRoleMgtException;
 import org.wso2.carbon.identity.organization.role.mgt.core.exception.OrganizationUserRoleMgtServerException;
 import org.wso2.carbon.identity.organization.role.mgt.core.models.*;
@@ -47,12 +45,10 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.wso2.carbon.identity.organization.role.mgt.core.constants.DatabaseConstants.H2Constants.*;
-import static org.wso2.carbon.identity.organization.role.mgt.core.constants.DatabaseConstants.SQLPlaceholders.DB_SCHEMA_COLUMN_NAME_ID;
 import static org.wso2.carbon.identity.organization.role.mgt.core.constants.DatabaseConstants.SQLPlaceholders.DB_SCHEMA_COLUMN_NAME_ROLE_ID;
 import static org.wso2.carbon.identity.organization.role.mgt.core.constants.DatabaseConstants.SQLPlaceholders.DB_SCHEMA_COLUMN_NAME_USER_ID;
 import static org.wso2.carbon.identity.organization.role.mgt.core.constants.DatabaseConstants.SQLPlaceholders.DB_SCHEMA_COLUMN_NAME_TENANT_ID;
 import static org.wso2.carbon.identity.organization.role.mgt.core.constants.DatabaseConstants.SQLPlaceholders.DB_SCHEMA_COLUMN_NAME_ORG_ID;
-import static org.wso2.carbon.identity.organization.role.mgt.core.constants.DatabaseConstants.SQLPlaceholders.DB_SCHEMA_COLUMN_NAME_HYBRID_ROLE_ID;
 import static org.wso2.carbon.identity.organization.role.mgt.core.constants.DatabaseConstants.SQLPlaceholders.DB_SCHEMA_COLUMN_NAME_ASSIGNED_AT;
 import static org.wso2.carbon.identity.organization.role.mgt.core.constants.DatabaseConstants.SQLPlaceholders.DB_SCHEMA_COLUMN_NAME_MANDATORY;
 import static org.wso2.carbon.identity.organization.role.mgt.core.constants.DatabaseConstants.SQLPlaceholders.DB_SCHEMA_COLUMN_NAME_PARENT_ID;

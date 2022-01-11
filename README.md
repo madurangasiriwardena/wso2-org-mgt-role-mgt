@@ -125,7 +125,7 @@ Type,
 Alternatively can use `mvn clean install -DskipTests` or `mvn clean install Dmaven.skip.test=true` to skip tests.
 
 - Copy the `api#identitiy#organization-mgt#v1.0.war` file to `{IS-HOME}/repository/deployment/server/webapps`
-- Copy the `org.wso2.carbon.identity.organization.role.mgt.core-1.0-SNAPSHOT.jar` file to `{IS-HOME}/repository/components/dropins`
+- Copy the `org.wso2.carbon.identity.organization.role.mgt.core-<version>.jar` file to `{IS-HOME}/repository/components/dropins`
 
 ## Check the OSGI Service is working
 
@@ -149,7 +149,7 @@ Organization B is the immediate parent of C and Organization C is the immediate 
 ### Add organization-user-role mappings
 **API**  
 ```
-https://localhost:9443/{tenant-domain}/{tenant}/api/identity/organization-mgt/v1.0/organizations/{organization-id}/roles
+https://localhost:9443/t/{tenant}/api/identity/organization-mgt/v1.0/organizations/{organization-id}/roles
 ```
 
 **Sample Request Body**  
@@ -220,7 +220,7 @@ https://localhost:9443/{tenant-domain}/{tenant}/api/identity/organization-mgt/v1
 ### Patch organization-user-role mappings
 **API**
 ```
-https://localhost:9443/{tenant-domain}/{tenant}/api/identity/organization-mgt/v1.0/organizations/{organization-id}/roles/{role-id}/users/{user-id}
+https://localhost:9443/t/{tenant}/api/identity/organization-mgt/v1.0/organizations/{organization-id}/roles/{role-id}/users/{user-id}
 ```
 
 **Sample Request Body**
@@ -283,7 +283,7 @@ https://localhost:9443/{tenant-domain}/{tenant}/api/identity/organization-mgt/v1
 ### Delete organization-user-role mappings
 **API**
 ```
-https://localhost:9443/{tenant-domain}/{tenant}/api/identity/organization-mgt/v1.0/organizations/{organization-id}/roles/{role-id}/users/{user-id}
+https://localhost:9443/t/{tenant}/api/identity/organization-mgt/v1.0/organizations/{organization-id}/roles/{role-id}/users/{user-id}
 ```
 
 **Request Parameters**
@@ -308,7 +308,7 @@ includeSubOrgs
 ### Get users from a certain organization having certain roles
 **API**
 ```
-https://localhost:9443/{tenant-domain}/{tenant}/api/identity/organization-mgt/v1.0/organizations/{organization-id}/roles/{role-id}/
+https://localhost:9443/t/{tenant}/api/identity/organization-mgt/v1.0/organizations/{organization-id}/roles/{role-id}/
 ```
 
 **Notes**
@@ -317,7 +317,7 @@ https://localhost:9443/{tenant-domain}/{tenant}/api/identity/organization-mgt/v1
 ### Get roles from a certain user in a organization
 **API**
 ```
-https://localhost:9443/{tenant-domain}/{tenant}/api/identity/organization-mgt/v1.0/organizations/{organization-id}/users/{user-id}/
+https://localhost:9443/t/{tenant}/api/identity/organization-mgt/v1.0/organizations/{organization-id}/users/{user-id}/
 ```
 
 **Notes**
