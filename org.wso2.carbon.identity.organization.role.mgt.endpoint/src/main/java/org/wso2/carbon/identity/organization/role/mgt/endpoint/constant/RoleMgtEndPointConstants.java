@@ -18,6 +18,9 @@
 
 package org.wso2.carbon.identity.organization.role.mgt.endpoint.constant;
 
+/**
+ * Role Management Endpoint constants.
+ */
 public class RoleMgtEndPointConstants {
     public static final String ORGANIZATION_PATH = "organizations";
     public static final String ORGANIZATION_ROLES_PATH = "organizations/%s/roles";

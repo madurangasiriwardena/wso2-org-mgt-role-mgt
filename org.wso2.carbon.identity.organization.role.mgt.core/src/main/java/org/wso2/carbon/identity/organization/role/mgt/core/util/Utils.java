@@ -18,15 +18,15 @@
 
 package org.wso2.carbon.identity.organization.role.mgt.core.util;
 
+import org.apache.commons.lang.StringUtils;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.database.utils.jdbc.JdbcTemplate;
-import org.wso2.carbon.identity.organization.role.mgt.core.constants.OrganizationUserRoleMgtConstants;
-import org.wso2.carbon.identity.organization.role.mgt.core.exception.OrganizationUserRoleMgtServerException;
-import org.wso2.carbon.identity.organization.role.mgt.core.internal.OrganizationUserRoleMgtDataHolder;
-import org.wso2.carbon.identity.organization.role.mgt.core.exception.OrganizationUserRoleMgtClientException;
-import org.apache.commons.lang.StringUtils;
 import org.wso2.carbon.database.utils.jdbc.NamedJdbcTemplate;
 import org.wso2.carbon.identity.core.persistence.UmPersistenceManager;
+import org.wso2.carbon.identity.organization.role.mgt.core.constants.OrganizationUserRoleMgtConstants;
+import org.wso2.carbon.identity.organization.role.mgt.core.exception.OrganizationUserRoleMgtClientException;
+import org.wso2.carbon.identity.organization.role.mgt.core.exception.OrganizationUserRoleMgtServerException;
+import org.wso2.carbon.identity.organization.role.mgt.core.internal.OrganizationUserRoleMgtDataHolder;
 import org.wso2.carbon.user.api.UserRealm;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.UserStoreManager;
@@ -43,7 +43,7 @@ public class Utils {
      *
      * @return new instance of JdbcTemplate.
      */
-    public static JdbcTemplate getNewJdbcTemplate(){
+    public static JdbcTemplate getNewJdbcTemplate() {
         return new JdbcTemplate(UmPersistenceManager.getInstance().getDataSource());
     }
 
@@ -51,7 +51,7 @@ public class Utils {
      *
      * @return new instance of NamedJdbcTemplate.
      */
-    public static NamedJdbcTemplate getNewNamedJdbcTemplate(){
+    public static NamedJdbcTemplate getNewNamedJdbcTemplate() {
         return new NamedJdbcTemplate(UmPersistenceManager.getInstance().getDataSource());
     }
 
@@ -128,7 +128,7 @@ public class Utils {
         return PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
     }
 
-    public static int getTenantId(){
+    public static int getTenantId() {
         return PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
     }
 }

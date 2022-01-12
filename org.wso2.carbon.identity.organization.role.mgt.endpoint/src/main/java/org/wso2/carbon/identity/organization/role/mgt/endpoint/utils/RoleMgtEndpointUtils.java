@@ -24,22 +24,26 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.MDC;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.organization.role.mgt.core.OrganizationUserRoleManager;
+import org.wso2.carbon.identity.organization.role.mgt.core.constants.OrganizationUserRoleMgtConstants;
+import org.wso2.carbon.identity.organization.role.mgt.core.exception.OrganizationUserRoleMgtClientException;
 import org.wso2.carbon.identity.organization.role.mgt.core.exception.OrganizationUserRoleMgtException;
-import org.wso2.carbon.identity.organization.role.mgt.endpoint.exception.ConflictRequestException;
+import org.wso2.carbon.identity.organization.role.mgt.endpoint.dto.ErrorDTO;
 import org.wso2.carbon.identity.organization.role.mgt.endpoint.exception.BadRequestException;
+import org.wso2.carbon.identity.organization.role.mgt.endpoint.exception.ConflictRequestException;
 import org.wso2.carbon.identity.organization.role.mgt.endpoint.exception.ForbiddenException;
 import org.wso2.carbon.identity.organization.role.mgt.endpoint.exception.InternalServerErrorException;
 import org.wso2.carbon.identity.organization.role.mgt.endpoint.exception.NotFoundException;
-import org.wso2.carbon.identity.organization.role.mgt.core.exception.OrganizationUserRoleMgtClientException;
-import org.wso2.carbon.identity.organization.role.mgt.core.constants.OrganizationUserRoleMgtConstants;
-import org.wso2.carbon.identity.organization.role.mgt.endpoint.dto.ErrorDTO;
 
-import javax.ws.rs.core.Response;
 import java.util.UUID;
 
-import static org.wso2.carbon.identity.organization.role.mgt.endpoint.constant.RoleMgtEndPointConstants.CORRELATION_ID_MDC;
-import static org.wso2.carbon.identity.organization.role.mgt.core.constants.OrganizationUserRoleMgtConstants.ErrorMessages.ERROR_CODE_UNEXPECTED;
+import javax.ws.rs.core.Response;
 
+import static org.wso2.carbon.identity.organization.role.mgt.core.constants.OrganizationUserRoleMgtConstants.ErrorMessages.ERROR_CODE_UNEXPECTED;
+import static org.wso2.carbon.identity.organization.role.mgt.endpoint.constant.RoleMgtEndPointConstants.CORRELATION_ID_MDC;
+
+/**
+ * Role Management Endpoint util class.
+ */
 public class RoleMgtEndpointUtils {
     private static final Log log = LogFactory.getLog(RoleMgtEndpointUtils.class);
 

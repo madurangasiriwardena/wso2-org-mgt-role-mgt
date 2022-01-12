@@ -18,15 +18,18 @@
 
 package org.wso2.carbon.identity.organization.role.mgt.core;
 
-import org.wso2.carbon.identity.organization.role.mgt.core.models.Role;
-import org.wso2.carbon.identity.organization.role.mgt.core.models.UserRoleOperation;
 import org.wso2.carbon.identity.organization.role.mgt.core.exception.OrganizationUserRoleMgtException;
+import org.wso2.carbon.identity.organization.role.mgt.core.models.OrganizationUserRoleMapping;
+import org.wso2.carbon.identity.organization.role.mgt.core.models.Role;
 import org.wso2.carbon.identity.organization.role.mgt.core.models.RoleMember;
 import org.wso2.carbon.identity.organization.role.mgt.core.models.UserRoleMapping;
-import org.wso2.carbon.identity.organization.role.mgt.core.models.OrganizationUserRoleMapping;
+import org.wso2.carbon.identity.organization.role.mgt.core.models.UserRoleOperation;
 
 import java.util.List;
 
+/**
+ * Interface for Organization-User-Role Management.
+ */
 public interface OrganizationUserRoleManager {
     /**
      * Create new {@link OrganizationUserRoleMapping}s in the database.
@@ -72,8 +75,8 @@ public interface OrganizationUserRoleManager {
      * @param includeSubOrgs
      * @throws OrganizationUserRoleMgtException
      */
-    void deleteOrganizationsUserRoleMapping(String organizationId, String userId, String roleId,  boolean includeSubOrgs)
-            throws OrganizationUserRoleMgtException;
+    void deleteOrganizationsUserRoleMapping(String organizationId, String userId, String roleId,
+                                            boolean includeSubOrgs) throws OrganizationUserRoleMgtException;
 
     /**
      * Delete all organization-user-role mappings of a user.

@@ -20,11 +20,16 @@ package org.wso2.carbon.identity.organization.role.mgt.core.dao;
 
 import org.wso2.carbon.identity.organization.role.mgt.core.exception.OrganizationUserRoleMgtException;
 import org.wso2.carbon.identity.organization.role.mgt.core.exception.OrganizationUserRoleMgtServerException;
-import org.wso2.carbon.identity.organization.role.mgt.core.models.*;
+import org.wso2.carbon.identity.organization.role.mgt.core.models.ChildParentAssociation;
+import org.wso2.carbon.identity.organization.role.mgt.core.models.OrganizationUserRoleMapping;
+import org.wso2.carbon.identity.organization.role.mgt.core.models.Role;
+import org.wso2.carbon.identity.organization.role.mgt.core.models.RoleMember;
 
 import java.util.List;
-import java.util.Map;
 
+/**
+ * Organization Management-Role Management DAO.
+ */
 public interface OrganizationUserRoleMgtDAO {
     /**
      * Add organization-user-role mappings.
@@ -148,5 +153,6 @@ public interface OrganizationUserRoleMgtDAO {
      * @return The assignedAt value of an organization-user-role mapping.
      * @throws OrganizationUserRoleMgtException Organization-User-Role Management exception.
      */
-    String getAssignedAtOfAnyOrganizationUserRoleMapping(String organizationId, String userId, String roleId, int tenantId) throws OrganizationUserRoleMgtException;
+    String getAssignedAtOfAnyOrganizationUserRoleMapping(String organizationId, String userId, String roleId,
+                                                         int tenantId) throws OrganizationUserRoleMgtException;
 }

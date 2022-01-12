@@ -28,9 +28,17 @@ import org.wso2.carbon.identity.organization.role.mgt.core.models.UserRoleMappin
 
 import java.util.Map;
 
-import static org.wso2.carbon.identity.organization.role.mgt.core.constants.OrganizationUserRoleEventConstants.*;
+import static org.wso2.carbon.identity.organization.role.mgt.core.constants.OrganizationUserRoleEventConstants.DATA;
+import static org.wso2.carbon.identity.organization.role.mgt.core.constants.OrganizationUserRoleEventConstants.ORGANIZATION_ID;
+import static org.wso2.carbon.identity.organization.role.mgt.core.constants.OrganizationUserRoleEventConstants.POST_ASSIGN_ORGANIZATION_USER_ROLE;
+import static org.wso2.carbon.identity.organization.role.mgt.core.constants.OrganizationUserRoleEventConstants.POST_REVOKE_ORGANIZATION_USER_ROLE;
+import static org.wso2.carbon.identity.organization.role.mgt.core.constants.OrganizationUserRoleEventConstants.STATUS;
+import static org.wso2.carbon.identity.organization.role.mgt.core.constants.OrganizationUserRoleEventConstants.Status;
+import static org.wso2.carbon.identity.organization.role.mgt.core.constants.OrganizationUserRoleEventConstants.USER_NAME;
 
-
+/**
+ * Handler class for Organization-User-Role mapping.
+ */
 public class OrganizationUserRoleHandler extends AbstractEventHandler {
     private static final Log AUDIT = CarbonConstants.AUDIT_LOG;
     private static final String AUDIT_MESSAGE =
@@ -46,9 +54,8 @@ public class OrganizationUserRoleHandler extends AbstractEventHandler {
         return 51;
     }
 
-
     @Override
-    public void handleEvent(Event event){
+    public void handleEvent(Event event) {
         //common data
         Map<String, Object> eventProperties = event.getEventProperties();
         String status = eventProperties.get(STATUS) instanceof Status ?

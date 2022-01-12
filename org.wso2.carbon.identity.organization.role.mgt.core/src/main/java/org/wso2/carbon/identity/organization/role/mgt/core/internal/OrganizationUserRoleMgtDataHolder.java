@@ -18,10 +18,13 @@
 
 package org.wso2.carbon.identity.organization.role.mgt.core.internal;
 
-import org.wso2.carbon.identity.organization.role.mgt.core.dao.OrganizationUserRoleMgtDAO;
 import org.wso2.carbon.identity.event.services.IdentityEventService;
+import org.wso2.carbon.identity.organization.role.mgt.core.dao.OrganizationUserRoleMgtDAO;
 import org.wso2.carbon.user.core.service.RealmService;
 
+/**
+ * Organization-User-Role Management Data Holder.
+ */
 public class OrganizationUserRoleMgtDataHolder {
     private static final OrganizationUserRoleMgtDataHolder orgAndUserRoleMgtDataHolder =
             new OrganizationUserRoleMgtDataHolder();

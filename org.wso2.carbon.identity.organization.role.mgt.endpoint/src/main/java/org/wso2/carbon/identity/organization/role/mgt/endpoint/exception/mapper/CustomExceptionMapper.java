@@ -31,6 +31,9 @@ import javax.ws.rs.ext.ExceptionMapper;
 
 import static org.wso2.carbon.identity.organization.role.mgt.core.constants.OrganizationUserRoleMgtConstants.ErrorMessages.INVALID_REQUEST;
 
+/**
+ * Custom Exception Mapper.
+ */
 public class CustomExceptionMapper implements ExceptionMapper<JsonMappingException> {
     private static final Log log = LogFactory.getLog(CustomExceptionMapper.class);
 

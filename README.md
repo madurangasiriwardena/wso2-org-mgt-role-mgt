@@ -37,7 +37,7 @@ For now, the implementation is done as an **OSGI** bundle and uses **H2** databa
       [[resource.access_control]]
       context="(.*)/api/identity/organization-mgt/v1.0/(.*)"
       secure = "true"
-      http_method = "ALL
+      http_method = "ALL"
       ```
     - Next start the IS and go to the H2 console using, `http://localhost:8082` and provide the JDBC URL, username and password given above.
       `JDBC URL = jdbc:h2:{IS-HOME}/repository/database/WSO2SHARED_DB`

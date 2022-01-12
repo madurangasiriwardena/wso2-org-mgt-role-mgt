@@ -28,10 +28,17 @@ import org.wso2.carbon.identity.organization.role.mgt.core.constants.Organizatio
 import org.wso2.carbon.identity.organization.role.mgt.core.constants.OrganizationUserRoleMgtConstants;
 import org.wso2.carbon.identity.organization.role.mgt.core.dao.OrganizationUserRoleMgtDAO;
 import org.wso2.carbon.identity.organization.role.mgt.core.dao.OrganizationUserRoleMgtDAOImpl;
+import org.wso2.carbon.identity.organization.role.mgt.core.exception.OrganizationUserRoleMgtException;
 import org.wso2.carbon.identity.organization.role.mgt.core.exception.OrganizationUserRoleMgtServerException;
 import org.wso2.carbon.identity.organization.role.mgt.core.internal.OrganizationUserRoleMgtDataHolder;
-import org.wso2.carbon.identity.organization.role.mgt.core.models.*;
-import org.wso2.carbon.identity.organization.role.mgt.core.exception.OrganizationUserRoleMgtException;
+import org.wso2.carbon.identity.organization.role.mgt.core.models.ChildParentAssociation;
+import org.wso2.carbon.identity.organization.role.mgt.core.models.OrganizationUserRoleMapping;
+import org.wso2.carbon.identity.organization.role.mgt.core.models.OrganizationUserRoleMappingForEvent;
+import org.wso2.carbon.identity.organization.role.mgt.core.models.Role;
+import org.wso2.carbon.identity.organization.role.mgt.core.models.RoleMember;
+import org.wso2.carbon.identity.organization.role.mgt.core.models.UserRoleMapping;
+import org.wso2.carbon.identity.organization.role.mgt.core.models.UserRoleMappingUser;
+import org.wso2.carbon.identity.organization.role.mgt.core.models.UserRoleOperation;
 import org.wso2.carbon.identity.scim2.common.DAO.GroupDAO;
 import org.wso2.carbon.identity.scim2.common.exceptions.IdentitySCIMException;
 import org.wso2.carbon.user.api.UserStoreException;
@@ -44,19 +51,49 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static org.wso2.carbon.identity.organization.role.mgt.core.constants.OrganizationUserRoleEventConstants.*;
-import static org.wso2.carbon.identity.organization.role.mgt.core.constants.OrganizationUserRoleMgtConstants.ErrorMessages.*;
+
+import static org.wso2.carbon.identity.organization.role.mgt.core.constants.OrganizationUserRoleEventConstants.DATA;
+import static org.wso2.carbon.identity.organization.role.mgt.core.constants.OrganizationUserRoleEventConstants.ORGANIZATION_ID;
+import static org.wso2.carbon.identity.organization.role.mgt.core.constants.OrganizationUserRoleEventConstants.POST_ASSIGN_ORGANIZATION_USER_ROLE;
+import static org.wso2.carbon.identity.organization.role.mgt.core.constants.OrganizationUserRoleEventConstants.POST_REVOKE_ORGANIZATION_USER_ROLE;
+import static org.wso2.carbon.identity.organization.role.mgt.core.constants.OrganizationUserRoleEventConstants.PRE_ASSIGN_ORGANIZATION_USER_ROLE;
+import static org.wso2.carbon.identity.organization.role.mgt.core.constants.OrganizationUserRoleEventConstants.PRE_REVOKE_ORGANIZATION_USER_ROLE;
+import static org.wso2.carbon.identity.organization.role.mgt.core.constants.OrganizationUserRoleEventConstants.STATUS;
+import static org.wso2.carbon.identity.organization.role.mgt.core.constants.OrganizationUserRoleEventConstants.Status;
+import static org.wso2.carbon.identity.organization.role.mgt.core.constants.OrganizationUserRoleEventConstants.TENANT_DOMAIN;
+import static org.wso2.carbon.identity.organization.role.mgt.core.constants.OrganizationUserRoleEventConstants.USER_ID;
+import static org.wso2.carbon.identity.organization.role.mgt.core.constants.OrganizationUserRoleEventConstants.USER_NAME;
+import static org.wso2.carbon.identity.organization.role.mgt.core.constants.OrganizationUserRoleMgtConstants.ErrorMessages.ADD_ORG_ROLE_USER_REQUEST_INVALID_ORGANIZATION_PARAM;
+import static org.wso2.carbon.identity.organization.role.mgt.core.constants.OrganizationUserRoleMgtConstants.ErrorMessages.ADD_ORG_ROLE_USER_REQUEST_INVALID_USER;
+import static org.wso2.carbon.identity.organization.role.mgt.core.constants.OrganizationUserRoleMgtConstants.ErrorMessages.ADD_ORG_ROLE_USER_REQUEST_MAPPING_EXISTS;
+import static org.wso2.carbon.identity.organization.role.mgt.core.constants.OrganizationUserRoleMgtConstants.ErrorMessages.DELETE_ORG_ROLE_USER_REQUEST_INVALID_BOOLEAN_VALUE;
+import static org.wso2.carbon.identity.organization.role.mgt.core.constants.OrganizationUserRoleMgtConstants.ErrorMessages.DELETE_ORG_ROLE_USER_REQUEST_INVALID_DIRECT_MAPPING;
+import static org.wso2.carbon.identity.organization.role.mgt.core.constants.OrganizationUserRoleMgtConstants.ErrorMessages.ERROR_CODE_USER_STORE_OPERATIONS_ERROR;
+import static org.wso2.carbon.identity.organization.role.mgt.core.constants.OrganizationUserRoleMgtConstants.ErrorMessages.INVALID_ROLE_ID;
+import static org.wso2.carbon.identity.organization.role.mgt.core.constants.OrganizationUserRoleMgtConstants.ErrorMessages.INVALID_ROLE_NON_INTERNAL_ROLE;
+import static org.wso2.carbon.identity.organization.role.mgt.core.constants.OrganizationUserRoleMgtConstants.ErrorMessages.PATCH_ORG_ROLE_USER_REQUEST_INVALID_BOOLEAN_VALUE;
+import static org.wso2.carbon.identity.organization.role.mgt.core.constants.OrganizationUserRoleMgtConstants.ErrorMessages.PATCH_ORG_ROLE_USER_REQUEST_INVALID_MAPPING;
+import static org.wso2.carbon.identity.organization.role.mgt.core.constants.OrganizationUserRoleMgtConstants.ErrorMessages.PATCH_ORG_ROLE_USER_REQUEST_INVALID_OPERATION;
+import static org.wso2.carbon.identity.organization.role.mgt.core.constants.OrganizationUserRoleMgtConstants.ErrorMessages.PATCH_ORG_ROLE_USER_REQUEST_INVALID_PATH;
+import static org.wso2.carbon.identity.organization.role.mgt.core.constants.OrganizationUserRoleMgtConstants.ErrorMessages.PATCH_ORG_ROLE_USER_REQUEST_INVALID_VALUE;
+import static org.wso2.carbon.identity.organization.role.mgt.core.constants.OrganizationUserRoleMgtConstants.ErrorMessages.PATCH_ORG_ROLE_USER_REQUEST_OPERATION_UNDEFINED;
+import static org.wso2.carbon.identity.organization.role.mgt.core.constants.OrganizationUserRoleMgtConstants.ErrorMessages.PATCH_ORG_ROLE_USER_REQUEST_PATH_UNDEFINED;
+import static org.wso2.carbon.identity.organization.role.mgt.core.constants.OrganizationUserRoleMgtConstants.ErrorMessages.PATCH_ORG_ROLE_USER_REQUEST_TOO_MANY_OPERATIONS;
 import static org.wso2.carbon.identity.organization.role.mgt.core.constants.OrganizationUserRoleMgtConstants.PATCH_OP_REPLACE;
-import static org.wso2.carbon.identity.organization.role.mgt.core.util.Utils.getUserStoreManager;
-import static org.wso2.carbon.identity.organization.role.mgt.core.util.Utils.handleServerException;
-import static org.wso2.carbon.identity.organization.role.mgt.core.util.Utils.handleClientException;
-import static org.wso2.carbon.identity.organization.role.mgt.core.util.Utils.getUserIdFromUserName;
 import static org.wso2.carbon.identity.organization.role.mgt.core.util.Utils.getTenantDomain;
 import static org.wso2.carbon.identity.organization.role.mgt.core.util.Utils.getTenantId;
+import static org.wso2.carbon.identity.organization.role.mgt.core.util.Utils.getUserIdFromUserName;
+import static org.wso2.carbon.identity.organization.role.mgt.core.util.Utils.getUserStoreManager;
+import static org.wso2.carbon.identity.organization.role.mgt.core.util.Utils.handleClientException;
+import static org.wso2.carbon.identity.organization.role.mgt.core.util.Utils.handleServerException;
 
+/**
+ * Impl class of OrganizationUserRoleManager.
+ */
 public class OrganizationUserRoleManagerImpl implements OrganizationUserRoleManager {
     @Override
-    public void addOrganizationUserRoleMappings(String organizationId, UserRoleMapping userRoleMapping) throws OrganizationUserRoleMgtException {
+    public void addOrganizationUserRoleMappings(String organizationId, UserRoleMapping userRoleMapping)
+            throws OrganizationUserRoleMgtException {
         //Fire pre-event
         fireEvent(PRE_ASSIGN_ORGANIZATION_USER_ROLE, organizationId, null,
                 OrganizationUserRoleEventConstants.Status.FAILURE);
@@ -110,16 +147,19 @@ public class OrganizationUserRoleManagerImpl implements OrganizationUserRoleMana
 
         List<OrganizationUserRoleMapping> organizationUserRoleMappings = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(usersGetPermissionsForSubOrgsNonMandatory)) {
-            List<ChildParentAssociation> childParentAssociations = organizationUserRoleMgtDAO.getAllSubOrganizations(organizationId);
+            List<ChildParentAssociation> childParentAssociations = organizationUserRoleMgtDAO
+                    .getAllSubOrganizations(organizationId);
             // add starting organization populate role mapping
-            organizationUserRoleMappings.addAll(populateOrganizationUserRoleMappings(organizationId, roleId, hybridRoleId, organizationId,
+            organizationUserRoleMappings.addAll(populateOrganizationUserRoleMappings(organizationId, roleId,
+                    hybridRoleId, organizationId,
                     usersGetPermissionsForSubOrgsNonMandatory));
                 /*
-                 Assume we have organizations A,B,C,D and A is the immediate parent of B and B is the immediate parent of C and so on.
-                 If we assign a non-mandatory role and if it is assigned at A saying include it to the sub organizations.
-                 Then we have to copy that role for all the sub organizations and the assigned level is that organization level.
-                 Say we are assigning A, a role R1 to propagate then it will go to B and B's assigned level id will be id of B. And when it propagates
-                 to C the assigned level id of it will be the id of C.
+                 Assume we have organizations A,B,C,D and A is the immediate parent of B and B is the immediate parent
+                 of C and so on. If we assign a non-mandatory role and if it is assigned at A saying include it to the
+                 sub organizations. Then we have to copy that role for all the sub organizations and the assigned
+                 level is that organization level. Say we are assigning A, a role R1 to propagate then it will go to B
+                 and B's assigned level id will be id of B. And when it propagates to C the assigned level id of it
+                 will be the id of C.
                  A -> roleId - R1, assignedLevelId - id(A), orgId - id(A), Mandatory - 0
                   \
                    B -> roleId - R1, assignedLevelId - id(B), orgId - id(B), Mandatory - 0
@@ -130,21 +170,26 @@ public class OrganizationUserRoleManagerImpl implements OrganizationUserRoleMana
                  */
 
             for (ChildParentAssociation childParentAssociation : childParentAssociations) {
-                organizationUserRoleMappings.addAll(populateOrganizationUserRoleMappings(childParentAssociation.getOrganizationId(), roleId, hybridRoleId,
+                organizationUserRoleMappings.addAll(populateOrganizationUserRoleMappings(childParentAssociation
+                                .getOrganizationId(), roleId, hybridRoleId,
                         childParentAssociation.getOrganizationId(), usersGetPermissionsForSubOrgsNonMandatory));
             }
         }
         if (CollectionUtils.isNotEmpty(usersGetPermissionForSubOrgsMandatory)) {
-            List<ChildParentAssociation> childParentAssociations = organizationUserRoleMgtDAO.getAllSubOrganizations(organizationId);
+            List<ChildParentAssociation> childParentAssociations = organizationUserRoleMgtDAO
+                    .getAllSubOrganizations(organizationId);
             // Add starting organization to populate role mapping
-            organizationUserRoleMappings.addAll(populateOrganizationUserRoleMappings(organizationId, roleId, hybridRoleId, organizationId,
+            organizationUserRoleMappings.addAll(populateOrganizationUserRoleMappings(organizationId, roleId,
+                    hybridRoleId, organizationId,
                     usersGetPermissionForSubOrgsMandatory));
                 /*
-                Assume we have organizations A,B,C,D and A is the immediate parent of B and B is the immediate parent of C and so on.
+                Assume we have organizations A,B,C,D and A is the immediate parent of B and B is the immediate parent
+                of C and so on.
                 If we assign a mandatory role and if it is assigned at A saying include it to the sub organizations.
-                Then we have to copy that role for all athe sub organizations, and they only get that from the assignedLevel.
-                Say we are assigning A, a role R1 as mandatory role it will be assigned to B and B's assigned level id will be the id of A. And
-                the assigned level id of C will be the id of A.
+                Then we have to copy that role for all athe sub organizations, and they only get that from the
+                assignedLevel.
+                Say we are assigning A, a role R1 as mandatory role it will be assigned to B and B's assigned level
+                id will be the id of A. And the assigned level id of C will be the id of A.
                 A -> roleId - R1, assignedLevelId - id(A), orgId - id(A), Mandatory - 1
                  \
                   B -> roleId - R1, assignedLevelId - id(A), orgId - id(B), Mandatory - 1
@@ -154,15 +199,17 @@ public class OrganizationUserRoleManagerImpl implements OrganizationUserRoleMana
                       D -> roleId - R1, assignedLevelId - id(A), orgId - id(D), Mandatory - 1
                 */
             for (ChildParentAssociation childParentAssociation : childParentAssociations) {
-                organizationUserRoleMappings.addAll(populateOrganizationUserRoleMappings(childParentAssociation.getOrganizationId(), roleId, hybridRoleId,
+                organizationUserRoleMappings.addAll(populateOrganizationUserRoleMappings(
+                        childParentAssociation.getOrganizationId(), roleId, hybridRoleId,
                         organizationId, usersGetPermissionForSubOrgsMandatory));
             }
         }
         if (CollectionUtils.isNotEmpty(usersGetPermissionOnlyToOneOrgNonMandatory)) {
                 /*
-                Assume we have organizations A,B,C,D and A is the immediate parent of B and B is the immediate parent of C and so on.
-                If we assign a non-mandatory role that we do not need to propagate to the child organizations, the assigned level id will
-                be the same as the organization id, and it will stop at that level without further propagating.
+                Assume we have organizations A,B,C,D and A is the immediate parent of B and B is the immediate
+                parent of C and so on. If we assign a non-mandatory role that we do not need to propagate to the child
+                organizations, the assigned level id will be the same as the organization id, and it will stop at that
+                level without further propagating.
                 */
             organizationUserRoleMappings
                     .addAll(populateOrganizationUserRoleMappings(organizationId, roleId, hybridRoleId, organizationId,
@@ -180,7 +227,9 @@ public class OrganizationUserRoleManagerImpl implements OrganizationUserRoleMana
     }
 
     @Override
-    public List<RoleMember> getUsersByOrganizationAndRole(String organizationId, String roleId, int offset, int limit, List<String> requestedAttributes, String filter) throws OrganizationUserRoleMgtException {
+    public List<RoleMember> getUsersByOrganizationAndRole(String organizationId, String roleId, int offset, int limit,
+                                                          List<String> requestedAttributes, String filter)
+            throws OrganizationUserRoleMgtException {
         OrganizationUserRoleMgtDAO organizationUserRoleMgtDAO = new OrganizationUserRoleMgtDAOImpl();
         return organizationUserRoleMgtDAO
                 .getUserIdsByOrganizationAndRole(organizationId, roleId, offset, limit, requestedAttributes,
@@ -188,15 +237,18 @@ public class OrganizationUserRoleManagerImpl implements OrganizationUserRoleMana
     }
 
     @Override
-    public void patchOrganizationsUserRoleMapping(String organizationId, String roleId, String userId, List<UserRoleOperation> userRoleOperations) throws OrganizationUserRoleMgtException {
+    public void patchOrganizationsUserRoleMapping(String organizationId, String roleId, String userId,
+                                                  List<UserRoleOperation> userRoleOperations)
+            throws OrganizationUserRoleMgtException {
         /*
         The patchOrganizationUserRoleMapping can have two userRoleOperations.
         1. mandatory operation
         2. include sub organizations role operation
-        For mandatory role operation, if the operation is mandatory, then includeSubOrganizations is implied. If the mandatory is
-        given then we have to check the equality of the organizationId and the organization id of the assignedLevel.
-        But if only the includeSubOrganization operation is given then, we have to check for non-mandatory organization-user-role
-        mapping for sub organizations too.
+        For mandatory role operation, if the operation is mandatory, then includeSubOrganizations is implied.
+        If the mandatory is given then we have to check the equality of the organizationId and the organization
+        id of the assignedLevel.
+        But if only the includeSubOrganization operation is given then, we have to check for non-mandatory
+        organization-user-role mapping for sub organizations too.
         */
         if (userRoleOperations.size() > 2) {
             throw handleClientException(PATCH_ORG_ROLE_USER_REQUEST_TOO_MANY_OPERATIONS, null);
@@ -212,37 +264,47 @@ public class OrganizationUserRoleManagerImpl implements OrganizationUserRoleMana
                         getTenantId());
         // Check whether directly assigned role mapping exists
         // If role assigned level == organization id
-        // If no directly assigned user-role mapping exists.
+        // then there are no directly assigned user-role mapping exists.
         if (directlyAssignedRoleMappingsInheritance == -1) {
             throw handleClientException(PATCH_ORG_ROLE_USER_REQUEST_INVALID_MAPPING, null);
         }
 
-        UserRoleOperation isMandatoryOp = StringUtils.equals("/isMandatory", userRoleOperationsArr[0].getPath()) ? userRoleOperationsArr[0] : userRoleOperationsArr[1];
-        UserRoleOperation includeSubOrgsOp = StringUtils.equals("/includeSubOrgs", userRoleOperationsArr[0].getPath()) ? userRoleOperationsArr[0] : userRoleOperationsArr[1];
+        UserRoleOperation isMandatoryOp = StringUtils.equals("/isMandatory",
+                userRoleOperationsArr[0].getPath()) ? userRoleOperationsArr[0] : userRoleOperationsArr[1];
+        UserRoleOperation includeSubOrgsOp = StringUtils.equals("/includeSubOrgs",
+                userRoleOperationsArr[0].getPath()) ? userRoleOperationsArr[0] : userRoleOperationsArr[1];
 
         List<OrganizationUserRoleMapping> addOrganizationUserRoleMappings = new ArrayList<>();
         List<OrganizationUserRoleMapping> deleteOrganizationUserRoleMappings = new ArrayList<>();
-        List<ChildParentAssociation> childParentAssociations = organizationUserRoleMgtDAO.getAllSubOrganizations(organizationId);
-        Map<String, String> organizationListToBeDeleted = new HashMap<>(); //organizationId and assignedAt
+        List<ChildParentAssociation> childParentAssociations = organizationUserRoleMgtDAO
+                .getAllSubOrganizations(organizationId);
         int hybridRoleId = getHybridRoleIdFromSCIMGroupId(roleId);
         /*
-         * If directlyAssignedRoleMappingsInheritance=1 it means that there is the possibility of having non-mandatory value set
-         * as well. Therefore, if the patching of it going to happen we will consider them too.
-         * includeSubOrgsOp.getValue() == true and isMandatoryOp.getValue() == true, then we will remove the non-mandatory user-org-role mappings
+         * If directlyAssignedRoleMappingsInheritance=1 it means that there is the possibility of having
+         * non-mandatory value set as well. Therefore, if the patching of it going to happen we will consider them too.
+         * includeSubOrgsOp.getValue() == true and isMandatoryOp.getValue() == true, then we will remove the
+         * non-mandatory user-org-role mappings
          * from sub organizations and will only have the mandatory user-org-role mappings.
          * */
         if (directlyAssignedRoleMappingsInheritance == 1) {
-            //check whether non-mandatory value is associated with the params organizationId, userId, roleId, tenantId, assignedAt and mandatory
-            boolean checkMapping = organizationUserRoleMgtDAO.isOrganizationUserRoleMappingExists(organizationId, userId, roleId, organizationId, false, getTenantId());
+            /*
+            check whether non-mandatory value is associated with the params organizationId, userId, roleId,
+            tenantId, assignedAt and mandatory
+             */
+            boolean checkMapping = organizationUserRoleMgtDAO.isOrganizationUserRoleMappingExists(organizationId,
+                    userId, roleId, organizationId, false, getTenantId());
             //if the value is true then there is a non-mandatory value associated with this. If false then there is not.
             if (checkMapping) {
-                deleteOrganizationUserRoleMappings.add(new OrganizationUserRoleMapping(organizationId, userId, hybridRoleId, roleId, organizationId, false));
+                deleteOrganizationUserRoleMappings.add(new OrganizationUserRoleMapping(organizationId, userId,
+                        hybridRoleId, roleId, organizationId, false));
             }
             for (ChildParentAssociation childParentAssociation : childParentAssociations) {
                 String orgId = childParentAssociation.getOrganizationId();
-                checkMapping = organizationUserRoleMgtDAO.isOrganizationUserRoleMappingExists(orgId, userId, roleId, orgId, false, getTenantId());
+                checkMapping = organizationUserRoleMgtDAO.isOrganizationUserRoleMappingExists(orgId, userId, roleId,
+                        orgId, false, getTenantId());
                 if (checkMapping) {
-                    deleteOrganizationUserRoleMappings.add(new OrganizationUserRoleMapping(orgId, userId, hybridRoleId, roleId, orgId, false));
+                    deleteOrganizationUserRoleMappings.add(new OrganizationUserRoleMapping(orgId, userId, hybridRoleId,
+                            roleId, orgId, false));
                 }
             }
             if (isMandatoryOp.getValue()) {
@@ -253,20 +315,25 @@ public class OrganizationUserRoleManagerImpl implements OrganizationUserRoleMana
             } else {
                 //add new organization-user-role mappings with assignedAt = orgId
                 //remove organization-user-role mappings with mandatory and already
-                addOrganizationUserRoleMappings.add(new OrganizationUserRoleMapping(organizationId, userId, hybridRoleId, roleId, organizationId, false));
-                deleteOrganizationUserRoleMappings.add(new OrganizationUserRoleMapping(organizationId, userId, hybridRoleId, roleId, organizationId, true));
+                addOrganizationUserRoleMappings.add(new OrganizationUserRoleMapping(organizationId, userId,
+                        hybridRoleId, roleId, organizationId, false));
+                deleteOrganizationUserRoleMappings.add(new OrganizationUserRoleMapping(organizationId, userId,
+                        hybridRoleId, roleId, organizationId, true));
                 for (ChildParentAssociation childParentAssociation : childParentAssociations) {
                     String orgId = childParentAssociation.getOrganizationId();
-                    checkMapping = organizationUserRoleMgtDAO.isOrganizationUserRoleMappingExists(orgId, userId, roleId, organizationId, true, getTenantId());
+                    checkMapping = organizationUserRoleMgtDAO.isOrganizationUserRoleMappingExists(orgId, userId, roleId,
+                            organizationId, true, getTenantId());
                     if (checkMapping) {
-                        deleteOrganizationUserRoleMappings.add(new OrganizationUserRoleMapping(orgId, userId, hybridRoleId, roleId, organizationId, true));
+                        deleteOrganizationUserRoleMappings.add(new OrganizationUserRoleMapping(orgId, userId,
+                                hybridRoleId, roleId, organizationId, true));
                     }
                 }
                 if (includeSubOrgsOp.getValue()) {
                     //add non-mandatory organization-user-role mappings
                     for (ChildParentAssociation childParentAssociation : childParentAssociations) {
                         String orgId = childParentAssociation.getOrganizationId();
-                        addOrganizationUserRoleMappings.add(new OrganizationUserRoleMapping(orgId, userId, hybridRoleId, roleId, orgId, false));
+                        addOrganizationUserRoleMappings.add(new OrganizationUserRoleMapping(orgId, userId, hybridRoleId,
+                                roleId, orgId, false));
                     }
                 }
                 //else nothing to do.
@@ -275,17 +342,24 @@ public class OrganizationUserRoleManagerImpl implements OrganizationUserRoleMana
             if (isMandatoryOp.getValue()) {
                 if (includeSubOrgsOp.getValue()) {
                     //add the parent organization-user-role mapping with non-mandatory value to the deletion list first.
-                    deleteOrganizationUserRoleMappings.add(new OrganizationUserRoleMapping(organizationId, userId, hybridRoleId, roleId, organizationId, false));
+                    deleteOrganizationUserRoleMappings.add(new OrganizationUserRoleMapping(organizationId, userId,
+                            hybridRoleId, roleId, organizationId, false));
                     //then check for child organizations with non-mandatory and remove them.
                     for (ChildParentAssociation childParentAssociation : childParentAssociations) {
                         String orgId = childParentAssociation.getOrganizationId();
-                        deleteOrganizationUserRoleMappings.add(new OrganizationUserRoleMapping(orgId, userId, hybridRoleId, roleId, orgId, false));
+                        deleteOrganizationUserRoleMappings.add(new OrganizationUserRoleMapping(orgId, userId,
+                                hybridRoleId, roleId, orgId, false));
                     }
-                    //add the parent organization-user-role mapping with mandatory value to the addOrganizationUserRoleMappings list.
-                    addOrganizationUserRoleMappings.add(new OrganizationUserRoleMapping(organizationId, userId, hybridRoleId, roleId, organizationId, true));
+                    /*
+                    add the parent organization-user-role mapping with mandatory value to the
+                    addOrganizationUserRoleMappings list.
+                    */
+                    addOrganizationUserRoleMappings.add(new OrganizationUserRoleMapping(organizationId, userId,
+                            hybridRoleId, roleId, organizationId, true));
                     for (ChildParentAssociation childParentAssociation : childParentAssociations) {
                         String orgId = childParentAssociation.getOrganizationId();
-                        addOrganizationUserRoleMappings.add(new OrganizationUserRoleMapping(orgId, userId, hybridRoleId, roleId, organizationId, true));
+                        addOrganizationUserRoleMappings.add(new OrganizationUserRoleMapping(orgId, userId, hybridRoleId,
+                                roleId, organizationId, true));
                     }
                 } else {
                     throw handleClientException(PATCH_ORG_ROLE_USER_REQUEST_INVALID_BOOLEAN_VALUE, null);
@@ -296,23 +370,30 @@ public class OrganizationUserRoleManagerImpl implements OrganizationUserRoleMana
                     //sub organizations and add accordingly.
                     for (ChildParentAssociation childParentAssociation : childParentAssociations) {
                         String orgId = childParentAssociation.getOrganizationId();
-                        boolean checkMapping = organizationUserRoleMgtDAO.isOrganizationUserRoleMappingExists(orgId, userId, roleId, orgId, false, getTenantId());
+                        boolean checkMapping = organizationUserRoleMgtDAO.isOrganizationUserRoleMappingExists(orgId,
+                                userId, roleId, orgId, false, getTenantId());
                         //if there is not a mapping add it.
                         if (!checkMapping) {
-                            addOrganizationUserRoleMappings.add(new OrganizationUserRoleMapping(orgId, userId, hybridRoleId, roleId, orgId, false));
+                            addOrganizationUserRoleMappings.add(new OrganizationUserRoleMapping(orgId, userId,
+                                    hybridRoleId, roleId, orgId, false));
                         }
                     }
                 }
-                //else we don't need to check it. Since even if we say don't include sub organizations, the non-mandatory
-                //organization-user-role mappings are unique to each organization. Therefore, we cannot possibly try to remove them here.
-                //If we need to remove them we need to delete them.
+                /*
+                else we don't need to check it. Since even if we say don't include sub organizations, the non-mandatory
+                organization-user-role mappings are unique to each organization.
+                Therefore, we cannot possibly try to remove them here.
+                If we need to remove them we need to delete them.
+                */
             }
         }
-        organizationUserRoleMgtDAO.updateMandatoryProperty(addOrganizationUserRoleMappings, deleteOrganizationUserRoleMappings, getTenantId());
+        organizationUserRoleMgtDAO.updateMandatoryProperty(addOrganizationUserRoleMappings,
+                deleteOrganizationUserRoleMappings, getTenantId());
     }
 
     @Override
-    public void deleteOrganizationsUserRoleMapping(String organizationId, String userId, String roleId, boolean includeSubOrgs) throws OrganizationUserRoleMgtException {
+    public void deleteOrganizationsUserRoleMapping(String organizationId, String userId, String roleId,
+                                                   boolean includeSubOrgs) throws OrganizationUserRoleMgtException {
         //Fire Pre-Event
         fireEvent(PRE_REVOKE_ORGANIZATION_USER_ROLE, organizationId, null, Status.FAILURE);
 
@@ -333,41 +414,55 @@ public class OrganizationUserRoleManagerImpl implements OrganizationUserRoleMana
                             organizationId, userId, roleId, organizationId));
         }
 
-        List<ChildParentAssociation> subOrganizations = organizationUserRoleMgtDAO.getAllSubOrganizations(organizationId);
+        List<ChildParentAssociation> subOrganizations = organizationUserRoleMgtDAO
+                .getAllSubOrganizations(organizationId);
         int hybridRoleId = getHybridRoleIdFromSCIMGroupId(roleId);
         List<OrganizationUserRoleMapping> organizationListToBeDeleted = new ArrayList<>();
         if (directlyAssignedRoleMappingsInheritance == 1) {
             if (!includeSubOrgs) {
                 throw handleClientException(DELETE_ORG_ROLE_USER_REQUEST_INVALID_BOOLEAN_VALUE, null);
             }
-            //If directlyAssignedRoleMappingsInheritance=1 means we are going to remove a mandatory role. When removing mandatory role
-            //we are removing everything from the sub-organizations including non-mandatory roles as well.
-            organizationListToBeDeleted.add(new OrganizationUserRoleMapping(organizationId, userId, hybridRoleId, roleId, organizationId, true));
-            boolean checkMapping = organizationUserRoleMgtDAO.isOrganizationUserRoleMappingExists(organizationId, userId, roleId, organizationId, false, getTenantId());
+            /*
+            If directlyAssignedRoleMappingsInheritance=1 means we are going to remove a mandatory role.
+            When removing mandatory role, we are removing everything from the sub-organizations including
+            non-mandatory roles as well.
+            */
+            organizationListToBeDeleted.add(new OrganizationUserRoleMapping(organizationId, userId, hybridRoleId,
+                    roleId, organizationId, true));
+            boolean checkMapping = organizationUserRoleMgtDAO.isOrganizationUserRoleMappingExists(organizationId,
+                    userId, roleId, organizationId, false, getTenantId());
             if (checkMapping) {
-                organizationListToBeDeleted.add(new OrganizationUserRoleMapping(organizationId, userId, hybridRoleId, roleId, organizationId, false));
+                organizationListToBeDeleted.add(new OrganizationUserRoleMapping(organizationId, userId, hybridRoleId,
+                        roleId, organizationId, false));
             }
             for (ChildParentAssociation childParentAssociation : subOrganizations) {
                 String orgId = childParentAssociation.getOrganizationId();
-                checkMapping = organizationUserRoleMgtDAO.isOrganizationUserRoleMappingExists(orgId, userId, roleId, orgId, false, getTenantId());
+                checkMapping = organizationUserRoleMgtDAO.isOrganizationUserRoleMappingExists(orgId, userId, roleId,
+                        orgId, false, getTenantId());
                 if (checkMapping) {
-                    organizationListToBeDeleted.add(new OrganizationUserRoleMapping(orgId, userId, hybridRoleId, roleId, orgId, false));
+                    organizationListToBeDeleted.add(new OrganizationUserRoleMapping(orgId, userId, hybridRoleId, roleId,
+                            orgId, false));
                 }
-                checkMapping = organizationUserRoleMgtDAO.isOrganizationUserRoleMappingExists(orgId, userId, roleId, organizationId, true, getTenantId());
+                checkMapping = organizationUserRoleMgtDAO.isOrganizationUserRoleMappingExists(orgId, userId, roleId,
+                        organizationId, true, getTenantId());
                 if (checkMapping) {
-                    organizationListToBeDeleted.add(new OrganizationUserRoleMapping(orgId, userId, hybridRoleId, roleId, organizationId, true));
+                    organizationListToBeDeleted.add(new OrganizationUserRoleMapping(orgId, userId, hybridRoleId, roleId,
+                            organizationId, true));
                 }
             }
         } else { //directlyAssignedRoleMappingsInheritance == 0
             //first add the parent organization
-            organizationListToBeDeleted.add(new OrganizationUserRoleMapping(organizationId, userId, hybridRoleId, roleId, organizationId, false));
-            boolean checkMapping = false;
+            organizationListToBeDeleted.add(new OrganizationUserRoleMapping(organizationId, userId, hybridRoleId,
+                    roleId, organizationId, false));
+            boolean checkMapping;
             if (includeSubOrgs) {
                 for (ChildParentAssociation childParentAssociation : subOrganizations) {
                     String orgId = childParentAssociation.getOrganizationId();
-                    checkMapping = organizationUserRoleMgtDAO.isOrganizationUserRoleMappingExists(orgId, userId, roleId, orgId, false, getTenantId());
+                    checkMapping = organizationUserRoleMgtDAO.isOrganizationUserRoleMappingExists(orgId, userId, roleId,
+                            orgId, false, getTenantId());
                     if (checkMapping) {
-                        organizationListToBeDeleted.add(new OrganizationUserRoleMapping(orgId, userId, hybridRoleId, roleId, orgId, false));
+                        organizationListToBeDeleted.add(new OrganizationUserRoleMapping(orgId, userId, hybridRoleId,
+                                roleId, orgId, false));
                     }
                 }
             }
@@ -389,19 +484,25 @@ public class OrganizationUserRoleManagerImpl implements OrganizationUserRoleMana
     }
 
     @Override
-    public List<Role> getRolesByOrganizationAndUser(String organizationId, String userId) throws OrganizationUserRoleMgtException {
+    public List<Role> getRolesByOrganizationAndUser(String organizationId, String userId)
+            throws OrganizationUserRoleMgtException {
         OrganizationUserRoleMgtDAO organizationUserRoleMgtDAO = new OrganizationUserRoleMgtDAOImpl();
         return organizationUserRoleMgtDAO.getRolesByOrganizationAndUser(organizationId, userId, getTenantId());
     }
 
     @Override
-    public boolean isOrganizationUserRoleMappingExists(String organizationId, String userId, String roleId, String assignedLevel, boolean mandatory) throws OrganizationUserRoleMgtException {
+    public boolean isOrganizationUserRoleMappingExists(String organizationId, String userId, String roleId,
+                                                       String assignedLevel, boolean mandatory)
+            throws OrganizationUserRoleMgtException {
         OrganizationUserRoleMgtDAO organizationUserRoleMgtDAO = new OrganizationUserRoleMgtDAOImpl();
         return organizationUserRoleMgtDAO
-                .isOrganizationUserRoleMappingExists(organizationId, userId, roleId, assignedLevel, mandatory, getTenantId());
+                .isOrganizationUserRoleMappingExists(organizationId, userId, roleId, assignedLevel, mandatory,
+                        getTenantId());
     }
 
-    private void fireEvent(String eventName, String organizationId, Object data, OrganizationUserRoleEventConstants.Status status) throws OrganizationUserRoleMgtServerException {
+    private void fireEvent(String eventName, String organizationId, Object data,
+                           OrganizationUserRoleEventConstants.Status status)
+            throws OrganizationUserRoleMgtServerException {
         IdentityEventService eventService = OrganizationUserRoleMgtDataHolder.getInstance().getIdentityEventService();
         Map<String, Object> eventProperties = new HashMap<>();
         eventProperties.put(USER_NAME, getAuthenticatedUsername());
@@ -456,9 +557,11 @@ public class OrganizationUserRoleManagerImpl implements OrganizationUserRoleMana
         }
     }
 
-    private void validateAddRoleMappingRequest(String organizationId, UserRoleMapping userRoleMapping) throws OrganizationUserRoleMgtException {
+    private void validateAddRoleMappingRequest(String organizationId, UserRoleMapping userRoleMapping)
+            throws OrganizationUserRoleMgtException {
         for (UserRoleMappingUser user : userRoleMapping.getUsers()) {
-            boolean isRoleMappingExists = isOrganizationUserRoleMappingExists(organizationId, user.getUserId(), userRoleMapping.getRoleId(),
+            boolean isRoleMappingExists = isOrganizationUserRoleMappingExists(organizationId, user.getUserId(),
+                    userRoleMapping.getRoleId(),
                     organizationId, user.isMandatoryRole());
             if (isRoleMappingExists) {
                 throw handleClientException(ADD_ORG_ROLE_USER_REQUEST_MAPPING_EXISTS, String.format(
@@ -468,8 +571,10 @@ public class OrganizationUserRoleManagerImpl implements OrganizationUserRoleMana
         }
     }
 
-    private List<OrganizationUserRoleMapping> populateOrganizationUserRoleMappings(String organizationId, String roleId, int hybridRoleId,
-                                                                                   String assignedAt, List<UserRoleMappingUser> usersList) {
+    private List<OrganizationUserRoleMapping> populateOrganizationUserRoleMappings(String organizationId, String roleId,
+                                                                                   int hybridRoleId, String assignedAt,
+                                                                                   List<UserRoleMappingUser>
+                                                                                           usersList) {
         List<OrganizationUserRoleMapping> organizationUserRoleMappings = new ArrayList<>();
         for (UserRoleMappingUser user : usersList) {
             OrganizationUserRoleMapping organizationUserRoleMapping = new OrganizationUserRoleMapping();
@@ -484,7 +589,8 @@ public class OrganizationUserRoleManagerImpl implements OrganizationUserRoleMana
         return organizationUserRoleMappings;
     }
 
-    private void validatePatchOperation(List<UserRoleOperation> userRoleOperations) throws OrganizationUserRoleMgtException {
+    private void validatePatchOperation(List<UserRoleOperation> userRoleOperations)
+            throws OrganizationUserRoleMgtException {
         // Validate op.
         for (UserRoleOperation userRoleOperation :
                 userRoleOperations) {
@@ -501,7 +607,8 @@ public class OrganizationUserRoleManagerImpl implements OrganizationUserRoleMana
                 throw handleClientException(PATCH_ORG_ROLE_USER_REQUEST_PATH_UNDEFINED, null);
             }
             //In the path, if there is not includeSubOrgs or isMandatory property throw an error
-            if (!(StringUtils.equals("/includeSubOrgs", userRoleOperation.getPath()) || StringUtils.equals("/isMandatory", userRoleOperation.getPath()))
+            if (!(StringUtils.equals("/includeSubOrgs", userRoleOperation.getPath()) ||
+                    StringUtils.equals("/isMandatory", userRoleOperation.getPath()))
             ) {
                 throw handleClientException(PATCH_ORG_ROLE_USER_REQUEST_INVALID_PATH, null);
             }

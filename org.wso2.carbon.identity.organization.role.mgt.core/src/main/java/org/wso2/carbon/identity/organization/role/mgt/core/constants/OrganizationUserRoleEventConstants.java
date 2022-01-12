@@ -18,6 +18,9 @@
 
 package org.wso2.carbon.identity.organization.role.mgt.core.constants;
 
+/**
+ * Constant for Organization-User-Role event handler.
+ */
 public class OrganizationUserRoleEventConstants {
     public static final String PRE_ASSIGN_ORGANIZATION_USER_ROLE = "PRE_ASSIGN_ORGANIZATION_USER_ROLE";
     public static final String POST_ASSIGN_ORGANIZATION_USER_ROLE = "POST_ASSIGN_ORGANIZATION_USER_ROLE";

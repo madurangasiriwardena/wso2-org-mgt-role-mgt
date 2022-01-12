@@ -24,6 +24,9 @@ import java.util.List;
 * Organization-User-Role mapping for role assignment and revoke events.
 * */
 
+/**
+ * Class for Organization-User-Role mapping for event.
+ */
 public class OrganizationUserRoleMappingForEvent {
     private String organizationId;
     private String roleId;
