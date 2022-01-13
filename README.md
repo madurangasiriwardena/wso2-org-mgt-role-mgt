@@ -124,7 +124,7 @@ Type,
 `mvn clean install` to generate the `jar` file in `core` module and `war` file in `endpoint` module.
 Alternatively can use `mvn clean install -DskipTests` or `mvn clean install Dmaven.skip.test=true` to skip tests.
 
-- Copy the `api#identitiy#organization-mgt#v1.0.war` file to `{IS-HOME}/repository/deployment/server/webapps`
+- Copy the `api#identity#organization-mgt#v1.0.war` file to `{IS-HOME}/repository/deployment/server/webapps`
 - Copy the `org.wso2.carbon.identity.organization.role.mgt.core-<version>.jar` file to `{IS-HOME}/repository/components/dropins`
 
 ## Check the OSGI Service is working
@@ -286,7 +286,7 @@ https://localhost:9443/t/{tenant}/api/identity/organization-mgt/v1.0/organizatio
 https://localhost:9443/t/{tenant}/api/identity/organization-mgt/v1.0/organizations/{organization-id}/roles/{role-id}/users/{user-id}
 ```
 
-**Request Parameters**
+**Query Parameters**
 ```
 includeSubOrgs
 ```
