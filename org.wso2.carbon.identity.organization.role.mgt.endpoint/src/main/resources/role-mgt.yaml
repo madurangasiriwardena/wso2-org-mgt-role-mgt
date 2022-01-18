@@ -466,7 +466,7 @@ components:
           example: Internal/User_Administrator
 
     #-----------------------------------------------------
-    # User Role Opeartion object
+    # User Role Operation object
     #-----------------------------------------------------
     UserRoleOperationDTO:
       required:

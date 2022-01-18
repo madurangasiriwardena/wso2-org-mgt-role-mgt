@@ -33,7 +33,7 @@
         <axiom.wso2.version>1.2.11-wso2v6</axiom.wso2.version>
         <equinox.osgi.services.version>3.5.100.v20160504-1419</equinox.osgi.services.version>
         <eclipse.osgi.version>3.9.1.v20130814-1242</eclipse.osgi.version>
-        <fasterxml.jackson.jaxrs-json-provider-version>2.9.7</fasterxml.jackson.jaxrs-json-provider-version>
+        <fasterxml.jackson.jaxrs-json-provider.version>2.9.7</fasterxml.jackson.jaxrs-json-provider.version>
         <fasterxml.jackson.version>2.9.7</fasterxml.jackson.version>
         <fasterxml.jackson.annotation.version>2.9.8</fasterxml.jackson.annotation.version>
         <google.code.findbugs.annotations.version>3.0.1</google.code.findbugs.annotations.version>
@@ -74,7 +74,7 @@
             <dependency>
                 <groupId>com.fasterxml.jackson.jaxrs</groupId>
                 <artifactId>jackson-jaxrs-json-provider</artifactId>
-                <version>${fasterxml.jackson.jaxrs-json-provider-version}</version>
+                <version>${fasterxml.jackson.jaxrs-json-provider.version}</version>
                 <scope>provided</scope>
             </dependency>
             <dependency>

@@ -25,11 +25,6 @@
     </properties>
 
     <dependencies>
-        <!--<dependency>
-            <groupId>org.wso2.carbon.identity.framework</groupId>
-            <artifactId>org.wso2.carbon.identity.organization.mgt.core</artifactId>
-            <version>${project.version}</version>
-        </dependency>-->
         <dependency>
             <groupId>org.wso2.carbon.utils</groupId>
             <artifactId>org.wso2.carbon.database.utils</artifactId>
