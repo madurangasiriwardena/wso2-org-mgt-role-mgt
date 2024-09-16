@@ -27,8 +27,10 @@ import org.wso2.carbon.identity.organization.role.mgt.core.models.Role;
 import org.wso2.carbon.identity.organization.role.mgt.core.models.RoleMember;
 import org.wso2.carbon.identity.organization.role.mgt.core.models.UserRoleMapping;
 import org.wso2.carbon.identity.organization.role.mgt.core.models.UserRoleMappingUser;
-import org.wso2.carbon.identity.organization.role.mgt.endpoint.*;
-import org.wso2.carbon.identity.organization.role.mgt.endpoint.dto.*;
+import org.wso2.carbon.identity.organization.role.mgt.core.models.UserRoleOperation;
+import org.wso2.carbon.identity.organization.role.mgt.endpoint.OrganizationsApiService;
+import org.wso2.carbon.identity.organization.role.mgt.endpoint.dto.UserRoleMappingDTO;
+import org.wso2.carbon.identity.organization.role.mgt.endpoint.dto.UserRoleOperationDTO;
 import org.wso2.carbon.identity.organization.role.mgt.endpoint.utils.RoleMgtEndpointUtils;
 
 import java.net.URI;
@@ -37,22 +39,30 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+
 import javax.ws.rs.core.Response;
 
-import static org.wso2.carbon.identity.organization.role.mgt.core.constants.OrganizationUserRoleMgtConstants.ErrorMessages.PATCH_ORG_ROLE_USER_REQUEST_TOO_MANY_OPERATIONS;
 import static org.wso2.carbon.identity.organization.role.mgt.core.util.Utils.handleClientException;
 import static org.wso2.carbon.identity.organization.role.mgt.endpoint.constant.RoleMgtEndPointConstants.ORGANIZATION_ROLES_PATH;
 import static org.wso2.carbon.identity.organization.role.mgt.endpoint.utils.RoleMgtEndpointUtils.getOrganizationUserRoleManager;
 
+/**
+ * Implementation of OrganizationApiService.
+ */
 public class OrganizationsApiServiceImpl implements OrganizationsApiService {
 
     private static final Log log = LogFactory.getLog(OrganizationsApiServiceImpl.class);
 
     @Override
-    public Response organizationsOrganizationIdRolesPost(String organizationId, UserRoleMappingDTO userRoleMappingDTO) {
+    public Response organizationsOrganizationIdRolesPost(String organizationId, UserRoleMappingDTO
+            userRoleMappingDTO) {
         try {
-            UserRoleMapping newUserRoleMappings = new UserRoleMapping(organizationId, userRoleMappingDTO.getUsers().stream()
-                    .map(mapping -> new UserRoleMappingUser(mapping.getUserId(), mapping.getMandatory(), mapping.getIncludeSubOrgs())).collect(Collectors.toList()));
+            UserRoleMapping newUserRoleMappings = new UserRoleMapping(userRoleMappingDTO.getRoleId(),
+                    userRoleMappingDTO.getUsers()
+                    .stream()
+                    .map(mapping -> new UserRoleMappingUser(mapping.getUserId(), mapping.getMandatory(),
+                            mapping.getIncludeSubOrgs()))
+                    .collect(Collectors.toList()));
             getOrganizationUserRoleManager().addOrganizationUserRoleMappings(organizationId, newUserRoleMappings);
             return Response.created(getOrganizationRoleResourceURI(organizationId)).build();
         } catch (OrganizationUserRoleMgtClientException e) {
@@ -63,39 +73,43 @@ public class OrganizationsApiServiceImpl implements OrganizationsApiService {
     }
 
     @Override
-    public Response organizationsOrganizationIdRolesRoleIdUsersGet(String organizationId, String roleId, Integer offset, Integer limit, String attributes, String filter) {
+    public Response organizationsOrganizationIdRolesRoleIdUsersGet(String organizationId, String roleId,
+                                                                   Integer offset, Integer limit, String attributes,
+                                                                   String filter) {
 
-        try{
-            if((limit!=null && limit < 1) && (offset!=null && offset <0)) {
-                throw handleClientException(OrganizationUserRoleMgtConstants.ErrorMessages.INVALID_ORGANIZATION_ROLE_USERS_GET_REQUEST, null);
+        try {
+            if ((limit != null && limit < 1) && (offset != null && offset < 0)) {
+                throw handleClientException(OrganizationUserRoleMgtConstants.ErrorMessages
+                        .INVALID_ORGANIZATION_ROLE_USERS_GET_REQUEST, null);
             }
             // If pagination parameters are not set, then set them to -1
             limit = limit == null ?  Integer.valueOf(-1) : limit;
             offset = offset == null ? Integer.valueOf(-1) : offset;
             List<String> requestedAttributes = attributes == null ? new ArrayList<>() :
                     Arrays.stream(attributes.split(",")).map(String :: trim).collect(Collectors.toList());
-            if(!requestedAttributes.contains("userName")){
+            if (!requestedAttributes.contains("userName")) {
                 requestedAttributes.add("userName");
             }
-            List<RoleMember>roleMembers = getOrganizationUserRoleManager()
+            List<RoleMember> roleMembers = getOrganizationUserRoleManager()
                     .getUsersByOrganizationAndRole(organizationId, roleId, offset, limit, requestedAttributes, filter);
-            return Response.ok().entity(roleMembers.stream().map(RoleMember::getUserAttributes).collect(Collectors.toList())).build();
-        }catch(OrganizationUserRoleMgtClientException e){
+            return Response.ok().entity(roleMembers.stream().map(RoleMember::getUserAttributes)
+                    .collect(Collectors.toList())).build();
+        } catch (OrganizationUserRoleMgtClientException e) {
             return RoleMgtEndpointUtils.handleBadRequestResponse(e, log);
-        }catch(OrganizationUserRoleMgtException e){
+        } catch (OrganizationUserRoleMgtException e) {
             return RoleMgtEndpointUtils.handleServerErrorResponse(e, log);
-        }catch(Throwable e){
+        } catch (Throwable e) {
             return RoleMgtEndpointUtils.handleUnexpectedServerError(e, log);
         }
     }
 
     @Override
-    public Response organizationsOrganizationIdRolesRoleIdUsersUserIdDelete(String organizationId, String roleId, String userId, Boolean mandatory, Boolean includeSubOrgs, String assignedAt) {
+    public Response organizationsOrganizationIdRolesRoleIdUsersUserIdDelete(String organizationId, String roleId,
+                                                                            String userId, Boolean includeSubOrgs) {
 
         try {
-            //TODO inlcudeSubOrgsCheck
             getOrganizationUserRoleManager()
-                    .deleteOrganizationsUserRoleMapping(organizationId, userId, roleId, null, mandatory, includeSubOrgs);
+                    .deleteOrganizationsUserRoleMapping(organizationId, userId, roleId, includeSubOrgs);
             return Response.noContent().build();
         } catch (OrganizationUserRoleMgtClientException e) {
             return RoleMgtEndpointUtils.handleBadRequestResponse(e, log);
@@ -107,15 +121,37 @@ public class OrganizationsApiServiceImpl implements OrganizationsApiService {
     }
 
     @Override
-    public Response organizationsOrganizationIdRolesRoleIdUsersUserIdPatch(String organizationId, String roleId, String userId, List<UserRoleOperationDTO> userRoleOperationDTO) {
-        return null;
+    public Response organizationsOrganizationIdRolesRoleIdUsersUserIdPatch(String organizationId, String roleId,
+                                                                           String userId,
+                                                                           List<UserRoleOperationDTO>
+                                                                                       userRoleOperationDTO) {
+        try {
+            getOrganizationUserRoleManager().patchOrganizationsUserRoleMapping(organizationId, roleId, userId,
+                    userRoleOperationDTO.stream().map(op -> new UserRoleOperation(op.getOp(), op.getPath(),
+                                    op.getValue()))
+                            .collect(Collectors.toList()));
+            return Response.noContent().build();
+        } catch (OrganizationUserRoleMgtClientException e) {
+            return RoleMgtEndpointUtils.handleBadRequestResponse(e, log);
+        } catch (OrganizationUserRoleMgtException e) {
+            return RoleMgtEndpointUtils.handleServerErrorResponse(e, log);
+        } catch (Throwable throwable) {
+            return RoleMgtEndpointUtils.handleUnexpectedServerError(throwable, log);
+        }
     }
 
     @Override
     public Response organizationsOrganizationIdUsersUserIdRolesGet(String organizationId, String userId) {
-
-        // do some magic!
-        return Response.ok().entity("magic!").build();
+        try {
+            List<Role> roles = getOrganizationUserRoleManager().getRolesByOrganizationAndUser(organizationId, userId);
+            return Response.ok().entity(roles).build();
+        } catch (OrganizationUserRoleMgtClientException e) {
+            return RoleMgtEndpointUtils.handleBadRequestResponse(e, log);
+        } catch (OrganizationUserRoleMgtException e) {
+            return RoleMgtEndpointUtils.handleServerErrorResponse(e, log);
+        } catch (Throwable throwable) {
+            return RoleMgtEndpointUtils.handleUnexpectedServerError(throwable, log);
+        }
     }
 
 

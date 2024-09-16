@@ -18,18 +18,22 @@
 
 package org.wso2.carbon.identity.organization.role.mgt.core.internal;
 
-import org.wso2.carbon.identity.organization.role.mgt.core.dao.OrganizationUserRoleMgtDAOImpl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
-import org.osgi.service.component.annotations.*;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
 import org.wso2.carbon.identity.event.handler.AbstractEventHandler;
 import org.wso2.carbon.identity.event.services.IdentityEventService;
-import org.wso2.carbon.identity.organization.role.mgt.core.handler.OrganizationUserRoleHandler;
-import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.identity.organization.role.mgt.core.OrganizationUserRoleManager;
 import org.wso2.carbon.identity.organization.role.mgt.core.OrganizationUserRoleManagerImpl;
+import org.wso2.carbon.identity.organization.role.mgt.core.dao.OrganizationUserRoleMgtDAOImpl;
+import org.wso2.carbon.identity.organization.role.mgt.core.handler.OrganizationUserRoleHandler;
+import org.wso2.carbon.user.core.service.RealmService;
 
 /**
  * OSGI service component for organization and user role management core bundle.

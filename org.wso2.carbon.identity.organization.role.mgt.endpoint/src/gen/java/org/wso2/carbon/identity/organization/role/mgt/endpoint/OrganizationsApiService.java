@@ -18,16 +18,7 @@
 
 package org.wso2.carbon.identity.organization.role.mgt.endpoint;
 
-import org.wso2.carbon.identity.organization.role.mgt.endpoint.*;
-import org.wso2.carbon.identity.organization.role.mgt.endpoint.dto.*;
-import org.apache.cxf.jaxrs.ext.multipart.Attachment;
-import org.apache.cxf.jaxrs.ext.multipart.Multipart;
-import java.io.InputStream;
 import java.util.List;
-import org.wso2.carbon.identity.organization.role.mgt.endpoint.dto.ErrorDTO;
-import java.util.List;
-import org.wso2.carbon.identity.organization.role.mgt.endpoint.dto.RoleDTO;
-import org.wso2.carbon.identity.organization.role.mgt.endpoint.dto.UserDTO;
 import org.wso2.carbon.identity.organization.role.mgt.endpoint.dto.UserRoleMappingDTO;
 import org.wso2.carbon.identity.organization.role.mgt.endpoint.dto.UserRoleOperationDTO;
 import javax.ws.rs.core.Response;
@@ -39,7 +30,7 @@ public interface OrganizationsApiService {
 
       public Response organizationsOrganizationIdRolesRoleIdUsersGet(String organizationId, String roleId, Integer offset, Integer limit, String attributes, String filter);
 
-      public Response organizationsOrganizationIdRolesRoleIdUsersUserIdDelete(String organizationId, String roleId, String userId, Boolean mandatory, Boolean includeSubOrgs, String assignedAt);
+      public Response organizationsOrganizationIdRolesRoleIdUsersUserIdDelete(String organizationId, String roleId, String userId, Boolean includeSubOrgs);
 
       public Response organizationsOrganizationIdRolesRoleIdUsersUserIdPatch(String organizationId, String roleId, String userId, List<UserRoleOperationDTO> userRoleOperationDTO);
 

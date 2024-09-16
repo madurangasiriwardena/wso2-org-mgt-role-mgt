@@ -26,9 +26,6 @@ public class RoleAssignedLevel {
     private String organizationId;
     private String organizationName;
 
-    public RoleAssignedLevel() {
-    }
-
     public RoleAssignedLevel(String organizationId, String organizationName) {
         this.organizationId = organizationId;
         this.organizationName = organizationName;

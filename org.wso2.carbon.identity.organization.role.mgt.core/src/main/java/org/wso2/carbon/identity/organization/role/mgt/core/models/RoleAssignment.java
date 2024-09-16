@@ -28,7 +28,7 @@ public class RoleAssignment {
     public RoleAssignment() {
     }
 
-    public RoleAssignment( boolean isMandatory,RoleAssignedLevel assignedAt ) {
+    public RoleAssignment (boolean isMandatory, RoleAssignedLevel assignedAt) {
         this.isMandatory = isMandatory;
         this.assignedAt = assignedAt;
     }

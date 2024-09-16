@@ -59,10 +59,6 @@ public class OrganizationUserRoleMgtException extends Exception {
         return errorCode;
     }
 
-    protected void setErrorCode(String errorCode) {
-        this.errorCode = errorCode;
-    }
-
     public String getDescription() {
         return description;
     }

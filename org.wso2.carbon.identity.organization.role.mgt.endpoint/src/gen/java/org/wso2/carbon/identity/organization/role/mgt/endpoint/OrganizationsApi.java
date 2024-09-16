@@ -110,9 +110,9 @@ public class OrganizationsApi  {
         @ApiResponse(code = 401, message = "Unauthorized", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Server Error", response = ErrorDTO.class)
     })
-    public Response organizationsOrganizationIdRolesRoleIdUsersUserIdDelete(@ApiParam(value = "ID of the organization of which, the user role mappings will be deleted.",required=true) @PathParam("organization-id") String organizationId, @ApiParam(value = "ID of the role of which, the user will be deleted.",required=true) @PathParam("role-id") String roleId, @ApiParam(value = "ID of the user.",required=true) @PathParam("user-id") String userId,     @Valid@ApiParam(value = "Mandatory role or not which will be deleted.")  @QueryParam("mandatory") Boolean mandatory,     @Valid@ApiParam(value = "The deletion should proceed to sub orgs or not.")  @QueryParam("includeSubOrgs") Boolean includeSubOrgs,     @Valid@ApiParam(value = "The assigned level of the role.")  @QueryParam("assignedAt") String assignedAt) {
+    public Response organizationsOrganizationIdRolesRoleIdUsersUserIdDelete(@ApiParam(value = "ID of the organization of which, the user role mappings will be deleted.",required=true) @PathParam("organization-id") String organizationId, @ApiParam(value = "ID of the role of which, the user will be deleted.",required=true) @PathParam("role-id") String roleId, @ApiParam(value = "ID of the user.",required=true) @PathParam("user-id") String userId,     @Valid@ApiParam(value = "The deletion should proceed to sub orgs or not.")  @QueryParam("includeSubOrgs") Boolean includeSubOrgs) {
 
-        return delegate.organizationsOrganizationIdRolesRoleIdUsersUserIdDelete(organizationId,  roleId,  userId,  mandatory,  includeSubOrgs,  assignedAt );
+        return delegate.organizationsOrganizationIdRolesRoleIdUsersUserIdDelete(organizationId,  roleId,  userId,  includeSubOrgs );
     }
 
     @Valid

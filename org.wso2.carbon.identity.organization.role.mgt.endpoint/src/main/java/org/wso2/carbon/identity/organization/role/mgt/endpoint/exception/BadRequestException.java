@@ -31,18 +31,18 @@ import javax.ws.rs.core.Response;
 public class BadRequestException extends WebApplicationException {
     private String message;
 
-    public BadRequestException(ErrorDTO error){
+    public BadRequestException(ErrorDTO error) {
         super(Response.status(Response.Status.BAD_REQUEST).entity(error)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON).build());
         message = error.getDescription();
     }
 
-    public BadRequestException(){
+    public BadRequestException() {
         super(Response.Status.BAD_REQUEST);
     }
 
     @Override
-    public String getMessage(){
+    public String getMessage() {
         return message;
     }
 }

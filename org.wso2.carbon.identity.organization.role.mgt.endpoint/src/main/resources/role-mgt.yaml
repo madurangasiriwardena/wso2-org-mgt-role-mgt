@@ -182,21 +182,11 @@ paths:
           required: true
           schema:
             type: string
-        - name: mandatory
-          in: query
-          description: Mandatory role or not which will be deleted.
-          schema:
-            type: boolean
         - name: includeSubOrgs
           in: query
           description: The deletion should proceed to sub orgs or not.
           schema:
             type: boolean
-        - name: assignedAt
-          in: query
-          description: The assigned level of the role.
-          schema:
-            type: string
       responses:
         204:
           description: No Content
@@ -476,7 +466,7 @@ components:
           example: Internal/User_Administrator
 
     #-----------------------------------------------------
-    # User Role Opeartion object
+    # User Role Operation object
     #-----------------------------------------------------
     UserRoleOperationDTO:
       required:

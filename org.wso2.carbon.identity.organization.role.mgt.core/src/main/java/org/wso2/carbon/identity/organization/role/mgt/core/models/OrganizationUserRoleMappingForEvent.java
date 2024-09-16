@@ -24,12 +24,13 @@ import java.util.List;
 * Organization-User-Role mapping for role assignment and revoke events.
 * */
 
+/**
+ * Class for Organization-User-Role mapping for event.
+ */
 public class OrganizationUserRoleMappingForEvent {
     private String organizationId;
     private String roleId;
     private String userId;
-    //TODO: checking inheritance
-    //TODO: Give more proper name
     private List<UserRoleMappingUser> usersRoleInheritance;
 
     public OrganizationUserRoleMappingForEvent() {
